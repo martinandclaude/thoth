@@ -142,6 +142,10 @@ footer p { margin: 0 0 4px; }
   table.settings td:first-child { white-space: normal; }
   .theme-toggle { position: absolute; }      /* scrolls away with the header instead of covering text */
 }
+section.claim > ul.points { color: var(--ink-2); max-width: 46em; margin: 0 0 14px; padding-left: 1.2em; }
+section.claim > ul.points li { margin-bottom: 8px; }
+section.claim > ul.points strong { color: var(--ink); }
+.facets.stack { grid-template-columns: 1fr; }
 svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
 </style>
 </head>
@@ -244,6 +248,34 @@ svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-wid
       <tr><td>SV truth for HG002 only</td><td>SV calls for other samples look scoreable but have no truth set; any number would be invented.</td><td>Skips them with a note. GIAB publishes SV benchmarks for HG002 alone.</td></tr>
     </tbody>
   </table>
+</section>
+
+<!-- ---------------------------------------------------------------- ONT -->
+<section class="claim" id="ont" hidden>
+  <p class="kicker">Checked against a published benchmark</p>
+  <h2>ONT's published GIAB numbers, reproduced, then scored thoth's way</h2>
+  <p>Oxford Nanopore published hap.py and truvari results for its GIAB 2025.01 release. Rescoring ONT's own public calls should give those numbers back before thoth's settings are set beside ONT's.</p>
+  <ul class="points">
+    <li><strong>Small variants.</strong> thoth scored ONT's published Clair3 calls for all seven samples against GIAB v4.2.1: <span id="ont-small"></span> Where traced (HG004, chr20–22), the residue is in the input: ONT benchmarked an earlier call set than the file it published, and thoth scores that earlier set exactly as ONT did.</li>
+    <li><strong>Structural variants.</strong> ONT's settings are unpublished; recovered from its output files, they are the GIAB draft benchmark V0.018 as truth and truvari 4.3.1 <code>bench --pick ac --passonly</code>, then <code>refine --recount</code>. Rerun on ONT's public Sniffles calls, <span id="ont-sv"></span> The published calls are a later version, phased differently in places, which only refine sees.</li>
+    <li><strong>What thoth changes.</strong> The matching window GIAB recommends for this benchmark (<code>-r 2000 -C 5000</code>, see <a href="#refine">above</a>; ONT kept the defaults 500 and 1000) and the current truvari 5. On the same truth, bench <span id="ont-bench"></span> For refine, thoth divides by every truth SV, as bench does; <code>--recount</code> re-derives the truth inside the realigned regions, so <span id="ont-recount"></span> The two refine recalls are not on the same scale.</li>
+  </ul>
+  <figure class="chart" data-chart="ont">
+    <div class="chart-head">
+      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall</span><span><i style="background:var(--series-2)"></i>Precision</span></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets stack"></div>
+    <figcaption>HG002, ONT's Sniffles calls (flow cell PAW70337), PASS only. ONT's rows: truvari 4.3.1; thoth's: truvari 5.4.0 with its v5.0q settings. ONT's refine rows are in the table, not on the axis: their truth total is <code>--recount</code>'s. <span id="ont-axis"></span></figcaption>
+  </figure>
+  <p class="takeaway" id="ont-takeaway"></p>
+  <figure class="chart" data-chart="ont-small">
+    <div class="chart-head">
+      <p class="facet-title">Small variants: ONT's published hap.py summary beside thoth's, per sample</p>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+  </figure>
+  <p>The recovered recipe and how it was confirmed, the exact commands for both recipes, the refine arithmetic and the small-variant investigation: <a href="https://github.com/martinandclaude/thoth/blob/main/docs/data/README.md">docs/data/README.md</a>.</p>
 </section>
 
 <!-- ---------------------------------------------------------------- 6 -->
@@ -549,6 +581,64 @@ function chartSeqsim(ev) {
     `Each length: ${rows[0].pairs} pairs of unrelated uniform-random sequences, scored with truvari's own similarity function (truvari 5.4.0). Axis starts at 60 %.`;
 }
 
+function chartONT(ev) {
+  const o = ev.ont; if (!o) return;
+  document.getElementById("ont").hidden = false;
+  const set = (id, str) => { document.getElementById(id).textContent = str; };
+  const signed = (d) => (d > 0 ? "+" : d < 0 ? "−" : "") + int(Math.abs(d));
+  // small variants: published against thoth, per sample and type
+  const gap = Math.max(...o.small.flatMap((r) => ["recall", "precision"].map((k) => Math.abs(r.thoth[k] - r.published[k]))));
+  const same = o.small.filter((r) => r.thoth.truth_total === r.published.truth_total).length;
+  const gaps = o.small.flatMap((r) => ["tp", "fp"].map((k) => ({ r, k, d: r.thoth[k] - r.published[k] })));
+  const outliers = gaps.filter((g) => Math.abs(g.d) > 100), rest = gaps.filter((g) => Math.abs(g.d) <= 100);
+  const bound = Math.max(...rest.map((g) => Math.abs(g.d)));
+  const kind = (g) => `${g.r.sample} ${g.r.type === "SNP" ? "SNPs" : "indels"}, where thoth has ${int(Math.abs(g.d))} ` +
+    `${g.d < 0 ? "fewer" : "more"} ${g.k === "fp" ? "false" : "true"} calls`;
+  set("ont-small", `${same} of ${o.small.length} truth totals are identical to ONT's, recall and precision differ by at most ` +
+    `${(100 * gap).toFixed(3)} percentage points, and counts by at most ${int(bound)} per sample and type` +
+    `${outliers.length ? `, except ${outliers.map(kind).join(" and ")}` : ""}.`);
+  // structural variants
+  const row = (who, method, truth = "GIAB draft V0.018") => o.sv.find((r) => r.scored_by === who && r.method === method && r.truth === truth);
+  const pub = { bench: row("ONT, as published", "bench"), refine: row("ONT, as published", "refine") };
+  const rerun = { bench: row("ONT's recipe, rerun", "bench"), refine: row("ONT's recipe, rerun", "refine") };
+  const off = (k, m) => Math.abs(rerun[m][k] - pub[m][k]);
+  const exact = ["base", "tp", "fn", "fp"].every((k) => off(k, "bench") === 0);
+  const plural = (n, word) => `${int(n)} ${word}${n === 1 ? "" : "s"}`;
+  const vs = (a, b) => (pct(a, 2) === pct(b, 2) ? `${pct(a, 2)} as published` : `${pct(a, 2)} against ${pct(b, 2)}`);
+  set("ont-sv", `${exact ? "bench gives ONT's counts exactly" : `bench lands within ${plural(off("base", "bench"), "truth SV")}`} ` +
+    `(recall ${pct(pub.bench.recall, 2)}, precision ${pct(pub.bench.precision, 2)}) and refine lands within ` +
+    `${plural(Math.max(off("base", "refine"), off("tp", "refine")), "truth SV")} and ${plural(off("fp", "refine"), "false call")} ` +
+    `(recall ${vs(rerun.refine.recall, pub.refine.recall)}, precision ${vs(rerun.refine.precision, pub.refine.precision)}).`);
+  const ours = { bench: row("thoth", "bench"), refine: row("thoth", "refine") };
+  set("ont-bench", `recall goes from ${pct(pub.bench.recall, 2)} to ${pct(ours.bench.recall, 2)} and precision from ` +
+    `${pct(pub.bench.precision, 2)} to ${pct(ours.bench.precision, 2)}.`);
+  set("ont-recount", `ONT's ${pct(pub.refine.recall, 2)} is over ${int(pub.refine.base)} truth SVs, not bench's ${int(pub.bench.base)}.`);
+  const fig = document.querySelector('[data-chart="ont"]'), box = fig.querySelector(".facets");
+  const series = [{ key: "recall", name: "Recall", color: "--series-1" }, { key: "precision", name: "Precision", color: "--series-2" }];
+  // ONT's refine rows are over --recount's truth total, not every truth SV: table only, not this axis
+  const plotted = o.sv.filter((r) => r.method === "bench" || r.scored_by === "thoth");
+  const { domain, ticks } = niceDomain(plotted.flatMap((r) => [r.recall, r.precision]), 0.01, 0.05);
+  const label = (r) => `${r.scored_by} · ${r.truth.replace("GIAB ", "").replace("draft ", "")} · ${int(r.base)} truth SVs`;
+  for (const [method, title] of [["bench", "Record by record (bench)"], ["refine", "Haplotype-aware (refine)"]]) {
+    const rows = plotted.filter((r) => r.method === method).map((r) => ({ label: label(r), recall: r.recall, precision: r.precision,
+      detail: [`${int(r.tp)} of ${int(r.base)} truth SVs found`, `${int(r.fn)} missed · ${int(r.fp)} false calls`] }));
+    const cell = document.createElement("div"); box.appendChild(cell);
+    dotPlot(cell, { title, rows, domain, series, ticks, labelW: 310, width: 700 });
+  }
+  set("ont-axis", `Axis starts at ${(100 * domain[0]).toFixed(0)} %.`);
+  tableToggle(fig, () => makeTable(["Scored by", "Truth", "Comparison", "Truth SVs", "Found", "Missed", "False calls", "Recall", "Precision"],
+    o.sv.map((r) => [r.scored_by, r.truth, r.method, int(r.base), int(r.tp), int(r.fn), int(r.fp), pct(r.recall, 2), pct(r.precision, 2)]), 3));
+  const v5 = { bench: row("thoth", "bench", "GIAB v5.0q"), refine: row("thoth", "refine", "GIAB v5.0q") };
+  set("ont-takeaway", `ONT's HG002 Sniffles calls on thoth's settings against GIAB v5.0q: recall ${pct(v5.bench.recall, 2)} record by record ` +
+    `and ${pct(v5.refine.recall, 2)} haplotype-aware, precision ${pct(v5.bench.precision, 2)} and ${pct(v5.refine.precision, 2)}, ` +
+    `with all ${int(v5.refine.base)} truth SVs counted.`);
+  tableToggle(document.querySelector('[data-chart="ont-small"]'), () => makeTable(
+    ["Sample", "Flow cell", "Type", "Truth total", "Recall, ONT", "Recall, thoth", "Precision, ONT", "Precision, thoth", "Found, thoth − ONT", "False calls, thoth − ONT"],
+    o.small.map((r) => [r.sample, r.flowcell, r.type, r.thoth.truth_total === r.published.truth_total ? int(r.thoth.truth_total) : `${int(r.published.truth_total)} / ${int(r.thoth.truth_total)}`,
+      pct(r.published.recall, 2), pct(r.thoth.recall, 2), pct(r.published.precision, 2), pct(r.thoth.precision, 2),
+      signed(r.thoth.tp - r.published.tp), signed(r.thoth.fp - r.published.fp)]), 3));
+}
+
 function runRecord(ev) {
   if (!ev.provenance) return;
   const rows = ev.provenance.flatMap((r, i) => {
@@ -568,7 +658,7 @@ fetch("data/evidence.json")
   .then((ev) => {
     document.getElementById("provenance").textContent =
       `Results: GIAB ${ev.sample}, ${ev.technology} sequencing, ${(ev.provenance || []).length > 1 ? "two runs of the same calls" : "one run"}, scored by thoth. Caller names are the public tools used.`;
-    chartTruth(ev); chartStrata(ev); chartSV(ev); chartSeqsim(ev); runRecord(ev);
+    chartTruth(ev); chartStrata(ev); chartSV(ev); chartSeqsim(ev); chartONT(ev); runRecord(ev);
   })
   .catch((err) => { document.getElementById("provenance").textContent = "Could not load results (" + err.message + ")."; });
 </script>

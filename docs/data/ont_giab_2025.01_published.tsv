@@ -1,0 +1,25 @@
+# Oxford Nanopore's own published benchmark of its GIAB 2025.01 release (sup basecalling,
+# wf-human-variation calls), one flow cell per sample, PASS rows only. Read from ONT's
+# public S3 outputs on 2026-09-29; the `source` column names the file each row came from.
+# Release page: https://epi2me.nanoporetech.com/giab-2025.01/
+# Small variants: hap.py (vcfeval; RTG 3.11 per their output header) against GIAB v4.2.1.
+# SVs: HG002 PAW70337 only; truvari against the GIAB draft
+# NIST_HG002_DraftBenchmark_defrabbV0.018-20240716. ONT publishes no truvari parameters;
+# the recipe was recovered on 2026-09-30 by reproducing these counts (see README.md).
+sample	flowcell	basecall	tool	truth	type	truth_total	tp	fn	fp	recall	precision	f1	source
+HG001	PAW81754	sup	happy	v4.2.1	INDEL	467702	418652	49050	37964	0.895126	0.919047	0.9069290000000001	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG001_PAW81754/happy_GIABv4.2.1.summary.csv
+HG001	PAW81754	sup	happy	v4.2.1	SNP	3254386	3248757	5629	5284	0.9982700000000001	0.9983770000000001	0.998324	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG001_PAW81754/happy_GIABv4.2.1.summary.csv
+HG002	PAW70337	sup	happy	v4.2.1	INDEL	525469	473060	52409	37102	0.9002620000000001	0.9295200000000001	0.9146569999999999	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG002_PAW70337/happy_GIABv4.2.1.summary.csv
+HG002	PAW70337	sup	happy	v4.2.1	SNP	3365127	3358986	6141	5145	0.998175	0.9984719999999999	0.998323	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG002_PAW70337/happy_GIABv4.2.1.summary.csv
+HG003	PAY87794	sup	happy	v4.2.1	INDEL	504501	448127	56374	39225	0.888258	0.921859	0.904747	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG003_PAY87794/happy_GIABv4.2.1.summary.csv
+HG003	PAY87794	sup	happy	v4.2.1	SNP	3327495	3316445	11050	6796	0.9966790000000001	0.997956	0.997317	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG003_PAY87794/happy_GIABv4.2.1.summary.csv
+HG004	PAY88428	sup	happy	v4.2.1	INDEL	510519	448496	62023	41371	0.87851	0.9179870000000001	0.8978149999999999	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG004_PAY88428/happy_GIABv4.2.1.summary.csv
+HG004	PAY88428	sup	happy	v4.2.1	SNP	3346610	3336734	9876	6032	0.997049	0.9981959999999999	0.9976219999999999	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG004_PAY88428/happy_GIABv4.2.1.summary.csv
+HG005	PAW88001	sup	happy	v4.2.1	INDEL	416777	395285	21492	22202	0.948433	0.9482200000000001	0.948326	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG005_PAW88001/happy_GIABv4.2.1.summary.csv
+HG005	PAW88001	sup	happy	v4.2.1	SNP	3275631	3268759	6872	6831	0.9979020000000001	0.997915	0.997909	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG005_PAW88001/happy_GIABv4.2.1.summary.csv
+HG006	PBA16846	sup	happy	v4.2.1	INDEL	428238	388915	39323	34061	0.908175	0.9215409999999999	0.914809	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG006_PBA16846/happy_GIABv4.2.1.summary.csv
+HG006	PBA16846	sup	happy	v4.2.1	SNP	3269860	3262645	7215	8058	0.997793	0.9975370000000001	0.9976649999999999	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG006_PBA16846/happy_GIABv4.2.1.summary.csv
+HG007	PAY12990	sup	happy	v4.2.1	INDEL	430326	388252	42074	29415	0.902228	0.9314309999999999	0.9165969999999999	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG007_PAY12990/happy_GIABv4.2.1.summary.csv
+HG007	PAY12990	sup	happy	v4.2.1	SNP	3284462	3274450	10012	5912	0.9969520000000001	0.9981979999999999	0.997575	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/happy-benchmark/sup/HG007_PAY12990/happy_GIABv4.2.1.summary.csv
+HG002	PAW70337	sup	truvari	V0.018	SV	28188	21062	7126	1957	0.7471973889598411	0.9054954606915202	0.8187653792855931	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/truvari-benchmark/hg002/SUP_PAW70337/summary.json
+HG002	PAW70337	sup	truvari_refine	V0.018	SV	22966	22072	894	234	0.9610728903596621	0.9882465216736149	0.9744703049789665	https://ont-open-data.s3.amazonaws.com/giab_2025.01/analysis/truvari-benchmark/hg002/SUP_PAW70337/refine.variant_summary.json

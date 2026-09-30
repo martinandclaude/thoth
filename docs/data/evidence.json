@@ -437,5 +437,410 @@
     "truvari": "0e2e6458c4764243a40500cc4da07c27827282fcf8b2704a96a7d7d1031bb501"
    }
   }
- ]
+ ],
+ "ont": {
+  "small": [
+   {
+    "sample": "HG001",
+    "flowcell": "PAW81754",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.895138,
+     "precision": 0.918995,
+     "truth_total": 467702,
+     "tp": 418658,
+     "fn": 49044,
+     "fp": 37991
+    },
+    "published": {
+     "recall": 0.895126,
+     "precision": 0.919047,
+     "truth_total": 467702,
+     "tp": 418652,
+     "fn": 49050,
+     "fp": 37964
+    }
+   },
+   {
+    "sample": "HG001",
+    "flowcell": "PAW81754",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.998269,
+     "precision": 0.998372,
+     "truth_total": 3254386,
+     "tp": 3248753,
+     "fn": 5633,
+     "fp": 5299
+    },
+    "published": {
+     "recall": 0.99827,
+     "precision": 0.998377,
+     "truth_total": 3254386,
+     "tp": 3248757,
+     "fn": 5629,
+     "fp": 5284
+    }
+   },
+   {
+    "sample": "HG002",
+    "flowcell": "PAW70337",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.90024,
+     "precision": 0.929464,
+     "truth_total": 525469,
+     "tp": 473048,
+     "fn": 52421,
+     "fp": 37133
+    },
+    "published": {
+     "recall": 0.900262,
+     "precision": 0.92952,
+     "truth_total": 525469,
+     "tp": 473060,
+     "fn": 52409,
+     "fp": 37102
+    }
+   },
+   {
+    "sample": "HG002",
+    "flowcell": "PAW70337",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.998165,
+     "precision": 0.99847,
+     "truth_total": 3365127,
+     "tp": 3358953,
+     "fn": 6174,
+     "fp": 5150
+    },
+    "published": {
+     "recall": 0.998175,
+     "precision": 0.998472,
+     "truth_total": 3365127,
+     "tp": 3358986,
+     "fn": 6141,
+     "fp": 5145
+    }
+   },
+   {
+    "sample": "HG003",
+    "flowcell": "PAY87794",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.888296,
+     "precision": 0.9219,
+     "truth_total": 504501,
+     "tp": 448146,
+     "fn": 56355,
+     "fp": 39205
+    },
+    "published": {
+     "recall": 0.888258,
+     "precision": 0.921859,
+     "truth_total": 504501,
+     "tp": 448127,
+     "fn": 56374,
+     "fp": 39225
+    }
+   },
+   {
+    "sample": "HG003",
+    "flowcell": "PAY87794",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.996684,
+     "precision": 0.997976,
+     "truth_total": 3327495,
+     "tp": 3316461,
+     "fn": 11034,
+     "fp": 6728
+    },
+    "published": {
+     "recall": 0.996679,
+     "precision": 0.997956,
+     "truth_total": 3327495,
+     "tp": 3316445,
+     "fn": 11050,
+     "fp": 6796
+    }
+   },
+   {
+    "sample": "HG004",
+    "flowcell": "PAY88428",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.878475,
+     "precision": 0.918012,
+     "truth_total": 510519,
+     "tp": 448478,
+     "fn": 62041,
+     "fp": 41356
+    },
+    "published": {
+     "recall": 0.87851,
+     "precision": 0.917987,
+     "truth_total": 510519,
+     "tp": 448496,
+     "fn": 62023,
+     "fp": 41371
+    }
+   },
+   {
+    "sample": "HG004",
+    "flowcell": "PAY88428",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.997043,
+     "precision": 0.998265,
+     "truth_total": 3346610,
+     "tp": 3336714,
+     "fn": 9896,
+     "fp": 5801
+    },
+    "published": {
+     "recall": 0.997049,
+     "precision": 0.998196,
+     "truth_total": 3346610,
+     "tp": 3336734,
+     "fn": 9876,
+     "fp": 6032
+    }
+   },
+   {
+    "sample": "HG005",
+    "flowcell": "PAW88001",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.948471,
+     "precision": 0.948249,
+     "truth_total": 416777,
+     "tp": 395301,
+     "fn": 21476,
+     "fp": 22190
+    },
+    "published": {
+     "recall": 0.948433,
+     "precision": 0.94822,
+     "truth_total": 416777,
+     "tp": 395285,
+     "fn": 21492,
+     "fp": 22202
+    }
+   },
+   {
+    "sample": "HG005",
+    "flowcell": "PAW88001",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.997894,
+     "precision": 0.997903,
+     "truth_total": 3275631,
+     "tp": 3268733,
+     "fn": 6898,
+     "fp": 6871
+    },
+    "published": {
+     "recall": 0.997902,
+     "precision": 0.997915,
+     "truth_total": 3275631,
+     "tp": 3268759,
+     "fn": 6872,
+     "fp": 6831
+    }
+   },
+   {
+    "sample": "HG006",
+    "flowcell": "PBA16846",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.908121,
+     "precision": 0.921422,
+     "truth_total": 428238,
+     "tp": 388892,
+     "fn": 39346,
+     "fp": 34115
+    },
+    "published": {
+     "recall": 0.908175,
+     "precision": 0.921541,
+     "truth_total": 428238,
+     "tp": 388915,
+     "fn": 39323,
+     "fp": 34061
+    }
+   },
+   {
+    "sample": "HG006",
+    "flowcell": "PBA16846",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.997791,
+     "precision": 0.997545,
+     "truth_total": 3269860,
+     "tp": 3262636,
+     "fn": 7224,
+     "fp": 8031
+    },
+    "published": {
+     "recall": 0.997793,
+     "precision": 0.997537,
+     "truth_total": 3269860,
+     "tp": 3262645,
+     "fn": 7215,
+     "fp": 8058
+    }
+   },
+   {
+    "sample": "HG007",
+    "flowcell": "PAY12990",
+    "type": "INDEL",
+    "thoth": {
+     "recall": 0.902211,
+     "precision": 0.931395,
+     "truth_total": 430326,
+     "tp": 388245,
+     "fn": 42081,
+     "fp": 29431
+    },
+    "published": {
+     "recall": 0.902228,
+     "precision": 0.931431,
+     "truth_total": 430326,
+     "tp": 388252,
+     "fn": 42074,
+     "fp": 29415
+    }
+   },
+   {
+    "sample": "HG007",
+    "flowcell": "PAY12990",
+    "type": "SNP",
+    "thoth": {
+     "recall": 0.996955,
+     "precision": 0.998209,
+     "truth_total": 3284462,
+     "tp": 3274460,
+     "fn": 10002,
+     "fp": 5877
+    },
+    "published": {
+     "recall": 0.996952,
+     "precision": 0.998198,
+     "truth_total": 3284462,
+     "tp": 3274450,
+     "fn": 10012,
+     "fp": 5912
+    }
+   }
+  ],
+  "sv": [
+   {
+    "scored_by": "ONT, as published",
+    "truth": "GIAB draft V0.018",
+    "method": "bench",
+    "recall": 0.747197,
+    "precision": 0.905495,
+    "base": 28188,
+    "tp": 21062,
+    "fn": 7126,
+    "fp": 1957
+   },
+   {
+    "scored_by": "ONT's recipe, rerun",
+    "truth": "GIAB draft V0.018",
+    "method": "bench",
+    "recall": 0.747197,
+    "precision": 0.905495,
+    "base": 28188,
+    "tp": 21062,
+    "fn": 7126,
+    "fp": 1957
+   },
+   {
+    "scored_by": "thoth",
+    "truth": "GIAB draft V0.018",
+    "method": "bench",
+    "recall": 0.75933,
+    "precision": 0.917518,
+    "base": 28188,
+    "tp": 21404,
+    "fn": 6784,
+    "fp": 1712
+   },
+   {
+    "scored_by": "thoth",
+    "truth": "GIAB v5.0q",
+    "method": "bench",
+    "recall": 0.759307,
+    "precision": 0.918173,
+    "base": 28123,
+    "tp": 21354,
+    "fn": 6769,
+    "fp": 1693
+   },
+   {
+    "scored_by": "ONT, as published",
+    "truth": "GIAB draft V0.018",
+    "method": "refine",
+    "recall": 0.961073,
+    "precision": 0.988247,
+    "base": 22966,
+    "tp": 22072,
+    "fn": 894,
+    "fp": 234
+   },
+   {
+    "scored_by": "ONT's recipe, rerun",
+    "truth": "GIAB draft V0.018",
+    "method": "refine",
+    "recall": 0.961063,
+    "precision": 0.988291,
+    "base": 22960,
+    "tp": 22066,
+    "fn": 894,
+    "fp": 233
+   },
+   {
+    "scored_by": "thoth",
+    "truth": "GIAB draft V0.018",
+    "method": "refine",
+    "recall": 0.866503,
+    "precision": 0.95741,
+    "base": 28188,
+    "tp": 24425,
+    "fn": 3763,
+    "fp": 884
+   },
+   {
+    "scored_by": "thoth",
+    "truth": "GIAB v5.0q",
+    "method": "refine",
+    "recall": 0.866728,
+    "precision": 0.958192,
+    "base": 28123,
+    "tp": 24375,
+    "fn": 3748,
+    "fp": 865
+   }
+  ],
+  "recount_split": {
+   "regions_refined": 2955,
+   "truth_outside": 19192,
+   "bench_truth_inside": 8996,
+   "refine_truth_inside": 3768
+  },
+  "provenance": {
+   "metrics_sha256": "b697790439438dc437174dd36d88f6a1bd45b64d38845ca0615701a444c0025e",
+   "config_sha256": "5cb6c42d85d372c8ff6a31ce664c907b9661afd0b59cdd5b95c55373f10d7124",
+   "containers": {
+    "happy": "b3a7b1f97eccf1f0cd1ab19eb12ebf8a3ab298dd2ad8010017987f46da345a48",
+    "rtg": "13580828b8f825023592ddc0eb5cf6db1a4c8aeaa3893ff0b8a0446205952fc8",
+    "bcftools": "72b84cccdaf50c705530aa532dcb7f1cabc4b803da5a00bc48d153c65f27f889",
+    "samtools": "aa363d3687cdb1a6d95c9dd9534d9f9a7b6f172f888c48799e22e8d185e37282",
+    "truvari": "0e2e6458c4764243a40500cc4da07c27827282fcf8b2704a96a7d7d1031bb501"
+   }
+  }
+ }
 }
