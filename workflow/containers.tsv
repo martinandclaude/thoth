@@ -9,6 +9,6 @@
 # No literal hash character in any cell: this file is read with pandas comment="#".
 name	image	digest	built_from	recipe	test_cmd
 bcftools	ghcr.io/martinandclaude/thoth/hts	PENDING	PENDING	containers/hts	bcftools --version && bgzip --version && tabix --version && hostname && comm --version
-samtools	ghcr.io/martinandclaude/thoth/hts	PENDING	PENDING	containers/hts	samtools --version
+samtools	ghcr.io/martinandclaude/thoth/hts	PENDING	PENDING	containers/hts	samtools --version && sed --version
 truvari	ghcr.io/martinandclaude/thoth/truvari	PENDING	PENDING	containers/truvari	truvari version && python -c 'import pyabpoa, pywfa, pysam'
 happy	ghcr.io/martinandclaude/thoth/happy	PENDING	PENDING	containers/happy	/opt/hap.py/bin/hap.py -h >/dev/null 2>&1 && /opt/hap.py/libexec/rtg-tools-install/rtg RTG_MEM=512m version >/dev/null

@@ -39,7 +39,7 @@ def val(**sel):
 
 print("small variants, hap.py (TESTSMALL, PASS, all regions)")
 hs = dict(tool="happy", truth="TESTSMALL", caller="snvcaller", subset="*", subtype="*", filter="PASS", genotype="*")
-for vt, tp, fn, fp in (("SNP", 9, 1, 2), ("INDEL", 1, 1, 0)):
+for vt, tp, fn, fp in (("SNP", 9, 1, 2), ("INDEL", 2, 1, 0)):
     check(f"{vt} TRUTH.TP", val(**hs, type=vt, metric="TRUTH.TP"), tp)
     check(f"{vt} TRUTH.FN", val(**hs, type=vt, metric="TRUTH.FN"), fn)
     check(f"{vt} QUERY.FP", val(**hs, type=vt, metric="QUERY.FP"), fp)
@@ -49,6 +49,18 @@ subsets = set(m[m.tool == "happy"].subset.dropna())
 check("own GenomeSpecific stratum present", "HG002_v4.2.1_testregion" in subsets, True)
 check("other sample's stratum absent", "HG007_v4.2.1_testregion" not in subsets, True)
 check("SNP TP in stratum 'left'", val(**{**hs, "subset": "left"}, type="SNP", metric="TRUTH.TP"), 9)
+
+print("an IUPAC code in the reference (B at 7004; truth and query write N)")
+per_variant = R / "e2e-HG002" / "snvcaller" / "TESTSMALL" / "happy" / "e2e-HG002.snvcaller.TESTSMALL.vcf.gz"
+rows = [line.rstrip("\n").split("\t") for line in gzip.open(per_variant, "rt") if not line.startswith("#")]
+
+
+def bd(row, sample):
+    return dict(zip(row[8].split(":"), row[sample].split(":")))["BD"]
+
+
+check("deletion over it scored TP in truth and query (REF, truth, query)",
+      [(r[3], bd(r, 9), bd(r, 10)) for r in rows if r[1] == "7000"], [("CTTTN", "TP", "TP")])
 
 print("SVs with refine (TESTSV: one deletion written two ways)")
 sv = dict(truth="TESTSV", caller="svcaller")

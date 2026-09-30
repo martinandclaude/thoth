@@ -3,7 +3,8 @@
 Deterministic (fixed seeds), so the expected counts in check_results.py are
 facts about these files, not estimates. Writes everything under tests/work/:
 
-  ref/chr1.fa                    60 kb random chr1
+  ref/chr1.fa                    60 kb random chr1, with one IUPAC code (B at
+                                 7004), as GRCh38 has 94
   giab/                          truth sets + a stratification tarball, served
                                  to the pipeline through file:// URLs
   manifest.tsv                   points at giab/, same schema as the real one
@@ -14,7 +15,10 @@ Planted small variants (HG002, truth TESTSMALL):
   10 SNPs + a 3 bp deletion + a 3 bp insertion in the truth. The query calls 9
   SNPs right, one with the wrong ALT (FN, and FP at the allele level), adds one
   novel SNP (FP), calls the deletion and misses the insertion.
-  -> SNP TP 9 / FN 1 / FP 2; INDEL TP 1 / FN 1.
+  Plus, in truth and query alike, a 4 bp deletion at 7000 whose REF ends on the
+  reference's B and writes it N, as GIAB and callers do; hap.py must read a
+  reference that says N there too, or vcfeval stops on the REF mismatch.
+  -> SNP TP 9 / FN 1 / FP 2; INDEL TP 2 / FN 1.
   Plus a ./1 half-call at 59000, outside the confident region (0-58000), which
   prep must keep.
 
@@ -42,6 +46,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 W = HERE / "work"
 N = 60000
+IUPAC = 7004  # the reference's one ambiguity base; inside the small-variant BED, clear of the SVs
 
 
 def main():
@@ -50,7 +55,8 @@ def main():
     for d in ("ref", "giab/truth", "giab/strat", "calls"):
         (W / d).mkdir(parents=True, exist_ok=True)
 
-    (W / "ref/chr1.fa").write_text(">chr1\n" + "\n".join(seq[i:i + 60] for i in range(0, N, 60)) + "\n")
+    ref = seq[:IUPAC - 1] + "B" + seq[IUPAC:]
+    (W / "ref/chr1.fa").write_text(">chr1\n" + "\n".join(ref[i:i + 60] for i in range(0, N, 60)) + "\n")
     (W / "ref/chr1.fa.fai").write_text(f"chr1\t{N}\t6\t60\t61\n")
 
     def b(pos):
@@ -72,6 +78,7 @@ def main():
     truth = [(p, b(p), alt(b(p))) for p in snps]
     truth.append((9000, seq[8999:9003], b(9000)))            # 3 bp deletion
     truth.append((12000, b(12000), b(12000) + "ACG"))         # 3 bp insertion
+    truth.append((IUPAC - 4, seq[IUPAC - 5:IUPAC - 1] + "N", b(IUPAC - 4)))  # deletion ending on the B
     truth.sort()
     query = []
     for p, r, a in truth:

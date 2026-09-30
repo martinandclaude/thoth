@@ -10,7 +10,7 @@ rule happy:
         truth_tbi=lambda w: truth_vcf(w.query, w.truth) + ".tbi",
         truth_bed=lambda w: truth_bed(w.query, w.truth),
         strat=lambda w: strat_tsv(w.query, w.truth),
-        ref=lambda w: ref_fasta(w.query),
+        ref=lambda w: happy_ref(w.query),
         sdf=lambda w: ref_sdf(w.query),
     output:
         summary=f"{OUT}/{{query}}/{{caller}}/{{truth}}/happy/{{query}}.{{caller}}.{{truth}}.summary.csv",

@@ -145,3 +145,33 @@ rule rtg_format:
         runtime=120,
     shell:
         "RTG_MEM={params.rtg_mem} /opt/hap.py/libexec/rtg-tools-install/rtg format -o {output} {input} > {log} 2>&1"
+
+
+rule happy_reference:
+    """The reference with its IUPAC ambiguity codes turned into N, for hap.py.
+
+    GRCh38 carries 94 ambiguity bases (B, K, M, R, S, W, Y); GIAB's truth sets
+    and callers write N there. hap.py rewrites the query's REF from its -r FASTA
+    before vcfeval, so with the codes left in the query says TGTGB where the
+    truth says TGTGN and vcfeval stops: "disagree on what the reference bases
+    should be". Every other rule reads the original FASTA; the SDF does not
+    matter (checked both ways).
+    """
+    input:
+        lambda w: REFERENCES[w.reference]["fasta"],
+    output:
+        fasta=RES + "/reference/{reference}.iupacN.fa",
+        fai=RES + "/reference/{reference}.iupacN.fa.fai",
+    log:
+        RES + "/logs/happy_reference_{reference}.log",
+    container:
+        container_for("samtools")
+    resources:
+        mem_mb=4000,
+        runtime=60,
+    shell:
+        r"""
+        sed '/^>/!s/[^ACGTNacgtn]/N/g' {input} > {output.fasta}.part 2> {log}
+        mv {output.fasta}.part {output.fasta}
+        samtools faidx {output.fasta} 2>> {log}
+        """

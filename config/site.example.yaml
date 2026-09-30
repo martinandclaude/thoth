@@ -16,7 +16,7 @@ resources_dir: /path/to/shared/giab_resources
 # built if missing. GIAB truth sets exist for GRCh38, GRCh37 and CHM13v2.0; the
 # manifest currently carries GRCh38 truth sets only.
 # A reference key must name the same FASTA everywhere this resources_dir is
-# shared; the SDF is keyed by the key alone.
+# shared; the SDF and hap.py's copy of the FASTA are keyed by the key alone.
 references:
   GRCh38:
     fasta: /path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna

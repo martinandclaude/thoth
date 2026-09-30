@@ -23,9 +23,9 @@ wrote down the result. It treats every caller equally and is tied to none.
   call outside any container, and `git` to record the code's commit.
 - Outbound HTTPS from the submit host, for `fetch_containers.sh` and the fetch
   rules; without it, set `fetch_on_login_node: false` in `config/site.yaml`.
-- About 10 GB of shared disk: the GRCh38 truth sets and stratifications
+- About 14 GB of shared disk: the GRCh38 truth sets and stratifications
   (`check_manifest` logs the download total), the unpacked stratifications, the
-  reference SDF and the SIFs.
+  reference SDF, hap.py's copy of the reference FASTA and the SIFs.
 - 128 GB of RAM per hap.py job (`small_variants.happy_mem_mb`).
 - The reference FASTA your VCFs were called against.
 
@@ -145,7 +145,8 @@ resources/manifest.tsv
                                      └─ absolutize_strat_tsv ─► <subset>.<sample>.abs.tsv
 
 reference FASTA ─┬─ rtg_format (hap.py image) ─► <ref>.sdf
-                 └─ faidx_reference ──────────► <fasta>.fai
+                 ├─ faidx_reference ──────────► <fasta>.fai
+                 └─ happy_reference ──────────► <ref>.iupacN.fa (ambiguity codes as N, for hap.py)
 
 run file (queries: sample × callers)
         ├─ per caller in vcf_small: check_contigs ─► prep_query ─► prepped.vcf.gz
@@ -167,10 +168,11 @@ stratifications of each reference that has truth rows (so far GRCh38 only).
 ## What thoth changes from the defaults
 
 Refine for GIAB v5.0q, `dup-to-ins` and `max-resolve` in truvari, `ALT=*`
-removed from SV truth, stratification by the query's own sample only, and
-half-calls such as `./1` kept. Each is covered by a planted-truth test in
-`tests/`, and each is explained, with real results, on the site:
-<https://martinandclaude.github.io/thoth/#settings>.
+removed from SV truth, stratification by the query's own sample only,
+half-calls such as `./1` kept, and hap.py given the reference with its IUPAC
+ambiguity codes as N, as the truth sets write them. Each is covered by a
+planted-truth test in `tests/`, and each is explained, with real results, on the
+site: <https://martinandclaude.github.io/thoth/#settings>.
 
 Small variants are scored on chr1-22 by default (`small_variants.regions`); SVs
 on every chromosome in the truth BED.

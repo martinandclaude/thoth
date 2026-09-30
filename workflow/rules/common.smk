@@ -265,6 +265,12 @@ def ref_sdf(query):
     return f"{RES}/sdf/{q_ref(query)}.sdf"
 
 
+def happy_ref(query):
+    """The reference hap.py reads: ambiguity codes as N (rule happy_reference).
+    Keyed like ref_sdf."""
+    return f"{RES}/reference/{q_ref(query)}.iupacN.fa"
+
+
 def query_vcf(query, caller, kind):
     """The caller's VCF for this query. kind is `small` or `sv`."""
     return QUERIES[query][f"vcf_{kind}"][caller]
