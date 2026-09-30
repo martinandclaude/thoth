@@ -6,14 +6,13 @@
 | `seqsim_baseline.json` | truvari's sequence similarity for unrelated random sequence pairs | `../seqsim_baseline.py` |
 | `ont_giab_2025.01_published.tsv` | ONT's own published GIAB 2025.01 benchmark numbers, with the URL of each | copied by hand from ONT's public outputs |
 
-Only aggregate counts and rates for public GIAB samples leave a metrics table.
+Every result on the page comes from Oxford Nanopore's public GIAB 2025.01 calls:
+ONT's published benchmark, reproduced, then rescored with thoth's settings. Only
+aggregate counts and rates for public GIAB samples leave the metrics table.
 Query and caller names, users, hosts and paths do not; `extract_evidence.py`
-takes provenance from a runinfo file through a whitelist (metrics and config
-checksums, the thoth commit, container digests).
-
-Most of this file is about one section of the page: ONT's published benchmark,
-reproduced and then rescored with thoth's settings. The other sections are
-summarised briefly at the end.
+takes provenance from the runinfo file through a whitelist (metrics and config
+checksums and container digests; the thoth commit too when the runinfo records
+one).
 
 ---
 
@@ -322,27 +321,56 @@ The container digests of the thoth run are in `evidence.json` under
    `vcf_sv`) and run thoth.
 4. Rerun ONT's SV recipe with the commands in step 2 into a directory `<repro>`,
    so that `<repro>/bench/` holds bench's and refine's outputs.
-5. Regenerate `evidence.json` (next section).
+5. Regenerate `evidence.json` (below).
 
 ---
+
+## The settings table, in full
+
+The page gives one line per setting; the longer version:
+
+- **`--refine` for v5.0q.** In the planted-truth test, a 300 bp deletion written
+  as two adjacent 150 bp deletions scores 0 % recall record by record and 100 %
+  after refine. thoth keeps both results, so the gap stays visible.
+- **`--dup-to-ins`.** GIAB's SV truth has no DUP records, so a caller's `<DUP>`
+  otherwise costs one false positive and one false negative per duplication.
+  As an insertion, sequence-resolved against the reference, it matches at 100 %
+  similarity.
+- **`--max-resolve 50000`.** truvari resolves symbolic SVs only up to 25 kb by
+  default and silently skips the sequence check above that. thoth resolves up
+  to the same 50 kb that bounds the comparison (`sizemax`).
+- **`ALT=*` removed from SV truth.** GIAB's v5.0q README warns that truvari bench
+  often miscategorises these spanning-deletion placeholders.
+- **Own-sample stratification.** GIAB v3.6 ships genome-specific strata for all
+  seven GIAB genomes; thoth keeps only the query sample's own, since another
+  genome's difficult regions say nothing about this one's calls. It also
+  removes 27 % of the 224 million intervals hap.py holds in memory.
+- **Half-calls kept.** The common filter `-e 'GT="ref" || GT="mis"'` drops `./1`
+  calls, whose ALT is asserted present, inflating false negatives on joint call
+  sets. bcftools treats any genotype with a missing allele as missing, so
+  `-i 'GT="alt"'` drops them too. thoth filters with `-i 'GT~"[1-9]"'`.
+- **hap.py reference with ambiguity codes as N.** See "Ambiguity codes" under
+  step 1: 94 IUPAC bases in GRCh38, and ONT's HG002 calls against v5.0q stop at
+  chr3:16902879 without it.
+
+thoth also skips SV calls for samples other than HG002, with a note: GIAB
+publishes SV benchmarks for HG002 alone.
 
 ## Regenerating `evidence.json`
 
 ```sh
 python docs/extract_evidence.py \
-  --query <query> --caller <small-variant caller> \
-  --runinfo <run>.runinfo.json \
-  --ont-metrics <comparison run>.metrics.tsv \
-  --ont-repro <repro> \
-  --ont-runinfo <comparison run>.runinfo.json \
-  <run>.metrics.tsv
+  --runinfo <comparison run>.runinfo.json \
+  --repro <repro> \
+  <comparison run>.metrics.tsv
 ```
 
-`--ont-metrics` and `--ont-repro` go together and add the `ont` key; without
-them the other keys are written exactly as before. `--ont-runinfo` is optional.
-Review the JSON before committing.
+`<repro>` is the directory from step 4 above; `--runinfo` is optional. The
+seqsim baseline is copied from `seqsim_baseline.json`; to rebuild that, run
+`../seqsim_baseline.py` in the truvari container first (its docstring has the
+command). Review the JSON before committing.
 
-`ont` holds:
+`evidence.json` holds two keys. `ont`:
 
 - `small`: per sample and variant type, ONT's `published` hap.py summary and
   `thoth`'s (recall, precision, truth total, TP, FN, FP);
@@ -352,18 +380,10 @@ Review the JSON before committing.
 - `recount_split`: the refine truth total split described above;
 - `provenance`: whitelisted checksums of the comparison run.
 
-Rates in `ont` carry six digits, so a two-decimal percentage is rounded once,
-from the source value (ONT's 98.8247 % refine precision would otherwise show as
-98.83 %); the other keys carry five.
+Rates carry six digits, so a two-decimal percentage is rounded once, from the
+source value (ONT's 98.8247 % refine precision would otherwise show as
+98.83 %).
 
-## The other evidence on the page
-
-- `truth_sets`, `strata`: one DeepVariant HG002 call set scored by thoth against
-  GIAB v4.2.1, v5.0q and CMRG v1.00, and broken down by GIAB v3.6
-  stratifications (own-sample strata only).
-- `sv_bench`, `sv_refine_bench`, `sv_refine`: Sniffles and cuteSV HG002 calls,
-  truvari 5.4.0 bench and refine against v5.0q (and bench against CMRG).
-- `seqsim_baseline`: truvari's sequence similarity for pairs of unrelated
-  uniform-random sequences, by length (`../seqsim_baseline.py` describes how it
-  is computed).
-- `provenance`: checksums and container digests of that run.
+`seqsim_baseline`: truvari's sequence similarity for pairs of unrelated
+uniform-random sequences, by length (`../seqsim_baseline.py` describes how it
+is computed).

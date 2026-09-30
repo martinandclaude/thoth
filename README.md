@@ -258,19 +258,18 @@ without Apptainer: `python3 tests/make_fixtures.py`, then
 
 ## The site's data
 
-`docs/index.html` reads `docs/data/evidence.json`, written from a real run's
-output. With the truvari SIF from `workflow/containers.tsv`:
+`docs/index.html` reads `docs/data/evidence.json`: Oxford Nanopore's public
+GIAB 2025.01 calls scored by thoth, beside ONT's published numbers and a rerun
+of ONT's SV recipe. With the truvari SIF from `workflow/containers.tsv`:
 
 ```bash
 apptainer exec <containers_dir>/truvari-<digest>.sif python docs/seqsim_baseline.py
-python docs/extract_evidence.py --query <query> [--caller <caller>] \
-    --runinfo <run>.runinfo.json <run>.metrics.tsv
+python docs/extract_evidence.py --runinfo <run>.runinfo.json --repro <repro> <run>.metrics.tsv
 ```
 
-The refine results come from the same run. To show them from an earlier run
-instead, append its metrics file and a second `--runinfo`, in the same order.
-Only aggregate rates and counts for HG002 leave the metrics table; review the
-JSON before committing.
+`docs/data/README.md` describes the comparison run and `<repro>`. Only
+aggregate rates and counts for public GIAB samples leave the metrics table;
+review the JSON before committing.
 
 ## Not finished, deliberately
 

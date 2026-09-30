@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>thoth — weigh your pipeline against the truth</title>
-<meta name="description" content="thoth weighs variant-calling pipelines against GIAB truth sets (v4.2.1, v5.0q and CMRG) using hap.py and truvari, with real results showing how much the verdict depends on how the benchmark is run.">
+<meta name="description" content="thoth weighs variant-calling pipelines against GIAB truth sets with hap.py and truvari. Oxford Nanopore's published GIAB 2025.01 benchmark, reproduced from its public calls, then scored thoth's way.">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icon-32.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <meta property="og:title" content="thoth — weigh your pipeline against the truth">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://martinandclaude.github.io/thoth/">
-<meta property="og:description" content="thoth weighs variant-calling pipelines against GIAB truth sets (v4.2.1, v5.0q and CMRG) using hap.py and truvari, with real results showing how much the verdict depends on how the benchmark is run.">
+<meta property="og:description" content="thoth weighs variant-calling pipelines against GIAB truth sets with hap.py and truvari. Oxford Nanopore's published GIAB 2025.01 benchmark, reproduced from its public calls, then scored thoth's way.">
 <meta property="og:image" content="https://martinandclaude.github.io/thoth/assets/thoth.png">
 <meta name="twitter:card" content="summary_large_image">
 <style>
@@ -65,6 +65,7 @@ body {
 }
 a { color: var(--navy); text-underline-offset: 2px; }
 code { font: 0.9em ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+p code, figcaption code, td code { white-space: nowrap; }   /* a flag is never split at its hyphens */
 .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
 
 header.hero { text-align: center; padding: 28px 0 8px; }
@@ -80,34 +81,33 @@ header.hero p.myth { font-size: 0.95rem; color: var(--ink-2); font-style: italic
 
 .theme-toggle { position: fixed; top: 12px; right: 12px; z-index: 5; font: inherit; font-size: 0.85rem; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); cursor: pointer; }
 
-.provenance { text-align: center; color: var(--muted); font-size: 0.9rem; margin: 6px 0 36px; }
+.source { text-align: center; color: var(--muted); font-size: 0.9rem; margin: 6px 0 36px; }
 
 section.claim { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px 26px 20px; margin: 0 0 26px; }
 section.claim .kicker { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--kicker); font-weight: 700; margin: 0; }
 section.claim h2 { font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.25; margin: 4px 0 8px; }
+section.claim h3 { font-size: 1.05rem; margin: 22px 0 4px; }
 section.claim > p { color: var(--ink-2); margin: 0 0 14px; max-width: 46em; }
 .takeaway:empty { display: none; }
-.takeaway { border-left: 3px solid var(--gold); padding: 6px 0 6px 14px; margin: 16px 0 4px; color: var(--ink); }
-
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 10px 0 4px; }
-.tile { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--page); }
-.tile .label { font-size: 0.85rem; color: var(--ink-2); }
-.tile .value { font-size: 1.9rem; font-weight: 650; line-height: 1.2; }
-.tile .note { font-size: 0.8rem; color: var(--muted); }
+section.claim > p.takeaway { border-left: 3px solid var(--gold); padding: 6px 0 6px 14px; margin: 16px 0 4px; color: var(--ink); }
 
 /* ---------------------------------------------------------------- charts */
 figure.chart { margin: 8px 0 0; }
 pre.cmd { margin: -4px 0 14px; overflow-x: auto; }
 pre.cmd code { display: inline-block; padding: 6px 10px; }
 .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.88rem; color: var(--ink-2); }
+.legend { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 0.88rem; color: var(--ink-2); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend i.ring-key { width: 14px; height: 14px; background: none; border: 2px solid var(--ink-2); }
+.legend i.dot-key { background: var(--ink-2); }
 .table-toggle { font: inherit; font-size: 0.82rem; color: var(--ink-2); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
 .facets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.facets.stack { grid-template-columns: 1fr; }
 .facet-title { font-size: 0.9rem; font-weight: 650; margin: 6px 0 0; }
 svg.plot { width: 100%; height: auto; display: block; overflow: visible; }
 svg.plot text { fill: var(--ink-2); font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
+svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
 svg.plot .tick text { fill: var(--muted); font-variant-numeric: tabular-nums; }
 svg.plot .grid line { stroke: var(--grid); stroke-width: 1; }
 svg.plot .base { stroke: var(--axis); stroke-width: 1; }
@@ -116,6 +116,8 @@ svg.plot .hit:focus { outline: none; }
 svg.plot .hit:focus-visible { stroke: var(--navy); stroke-width: 2; }
 svg.plot g.mark:focus-within circle.dot, svg.plot g.mark:hover circle.dot { stroke-width: 3; }
 circle.dot { stroke: var(--ring); stroke-width: 2; }
+circle.ring { fill: none; stroke-width: 2; }
+@media (max-width: 1200px) { .theme-toggle { position: absolute; } }   /* below this it would cover the content column */
 figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
 .table-scroll { overflow-x: auto; }
 table.data { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 8px; }
@@ -126,27 +128,22 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 .tooltip .k { color: var(--ink-2); }
 .tooltip .row { display: flex; align-items: center; gap: 6px; }
 .tooltip .key { width: 12px; height: 2px; display: inline-block; }
-.pending { border: 1px dashed var(--axis); border-radius: 10px; padding: 12px 14px; color: var(--ink-2); font-size: 0.92rem; margin-top: 10px; }
 
 table.settings { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 table.settings th, table.settings td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--grid); }
 table.settings th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-table.settings td:first-child { white-space: nowrap; font-weight: 600; }
+table.settings td:first-child { font-weight: 600; }
 
 footer { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 20px 0 40px; }
 footer p { margin: 0 0 4px; }
-#run-record { margin-bottom: 16px; }
-#run-record td:last-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8rem; word-break: break-all; }
 @media (max-width: 560px) {
   section.claim { padding: 18px 16px 14px; }
-  table.settings td:first-child { white-space: normal; }
-  .theme-toggle { position: absolute; }      /* scrolls away with the header instead of covering text */
+  table.settings, table.settings tbody, table.settings tr, table.settings td { display: block; }
+  table.settings thead { display: none; }
+  table.settings tr { border-bottom: 1px solid var(--grid); padding: 8px 0; }
+  table.settings td { border: 0; padding: 2px 0; }
+  table.settings td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-weight: 600; }
 }
-section.claim > ul.points { color: var(--ink-2); max-width: 46em; margin: 0 0 14px; padding-left: 1.2em; }
-section.claim > ul.points li { margin-bottom: 8px; }
-section.claim > ul.points strong { color: var(--ink); }
-.facets.stack { grid-template-columns: 1fr; }
-svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
 </style>
 </head>
 <body>
@@ -160,66 +157,89 @@ svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-wid
   <p class="myth">In the old judgement, Anubis weighed the heart against the feather of Ma'at while Thoth wrote down the verdict. Here the feather is GIAB and Anubis's scales are hap.py and truvari — and, as the results below show, the verdict depends on how carefully those scales are set.</p>
   <div class="actions">
     <a class="btn primary" href="https://github.com/martinandclaude/thoth#quick-start">Get thoth and run it</a>
-    <a class="btn" href="#settings">What thoth sets, and why</a>
+    <a class="btn" href="#ont">See the ONT comparison</a>
   </div>
 </header>
-<p class="provenance" id="provenance">Loading results…</p>
+<p class="source" id="source">Loading results…</p>
 
 <!-- ---------------------------------------------------------------- 1 -->
-<section class="claim" id="truth-sets">
-  <p class="kicker">Choice 1 · the truth set</p>
-  <h2>The same calls get a different score from each truth set</h2>
-  <p>One DeepVariant callset, scored three times — against GIAB v4.2.1, the newer T2T-based v5.0q, and the CMRG set of 273 medically relevant genes. SNPs barely move. Indels do not: v5.0q reaches into repeats and complex regions that v4.2.1 excluded, so it finds misses that the older benchmark could not see.</p>
-  <figure class="chart" data-chart="truth">
+<section class="claim" id="ont">
+  <p class="kicker">Checked against a published benchmark</p>
+  <h2>thoth gives back Oxford Nanopore's published GIAB numbers</h2>
+  <p>ONT published hap.py and truvari results for its GIAB 2025.01 calls. thoth scored the same public call files.</p>
+  <h3>Small variants: ONT's Clair3 calls, hap.py against GIAB v4.2.1</h3>
+  <figure class="chart" data-chart="ont-small">
+    <div class="chart-head">
+      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall</span><span><i style="background:var(--series-2)"></i>Precision</span><span><i class="ring-key"></i>ONT, as published</span><span><i class="dot-key"></i>thoth</span></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets"></div>
+    <figcaption>ONT's published Clair3 calls (wf-human-variation, sup), PASS, chr1-22, the flow cell ONT benchmarked per sample. <span id="ont-small-axis"></span></figcaption>
+  </figure>
+  <p class="takeaway" id="ont-small-takeaway"></p>
+  <p>The HG004 SNP gap is in the input, not the scoring: on HG004 (traced on chr20-22), ONT's benchmark ran on an earlier Clair3 call set than the one it published (<a href="https://github.com/martinandclaude/thoth/blob/main/docs/data/README.md#step-1-small-variants">details</a>).</p>
+  <h3>Structural variants: HG002 Sniffles, ONT's recipe rerun</h3>
+  <p>ONT's truvari outputs record no parameters; recovered from them: truvari 4.3.1 <code>bench --pick ac --passonly</code>, then <code>refine --recount</code>, against the GIAB draft V0.018 (<a href="https://github.com/martinandclaude/thoth/blob/main/docs/data/README.md#step-2-onts-sv-recipe-recovered-and-rerun">how</a>).</p>
+  <figure class="chart" data-chart="ont-sv">
+    <div class="chart-head">
+      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall</span><span><i style="background:var(--series-2)"></i>Precision</span><span><i class="ring-key"></i>ONT, as published</span><span><i class="dot-key"></i>ONT's recipe, rerun</span></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets stack"></div>
+    <figcaption>ONT's HG002 Sniffles calls, flow cell PAW70337, PASS only. <span id="ont-sv-axis"></span></figcaption>
+  </figure>
+  <p class="takeaway" id="ont-sv-takeaway"></p>
+</section>
+
+<!-- ---------------------------------------------------------------- 2 -->
+<section class="claim" id="thoth-way">
+  <p class="kicker">The same calls, scored thoth's way</p>
+  <h2>ONT's SV calls on thoth's settings and GIAB v5.0q</h2>
+  <p>thoth uses GIAB's recommended matching window (<code>-r 2000 -C 5000</code>; ONT used truvari's defaults, <code>-r 500 -C 1000</code>), truvari 5.4.0 rather than 4.3.1, and a refine recall over every truth SV. ONT's <span id="ont-refine-recall"></span> refine recall is over the <span id="ont-refine-base"></span> truth SVs <code>--recount</code> counts, not bench's <span id="ont-bench-base"></span>.</p>
+  <figure class="chart" data-chart="ont">
     <div class="chart-head">
       <div class="legend"><span><i style="background:var(--series-1)"></i>Recall</span><span><i style="background:var(--series-2)"></i>Precision</span></div>
       <button class="table-toggle" type="button">Show table</button>
     </div>
-    <div class="facets"></div>
-    <figcaption>PASS calls on chr1-22, inside each truth set's benchmark regions. Axes start where the data does, not at 0 — they are dot plots, not bars.</figcaption>
+    <div class="facets stack"></div>
+    <figcaption>ONT's HG002 Sniffles calls (flow cell PAW70337), PASS only. ONT's refine rows are table-only: their truth total is <code>--recount</code>'s. <span id="ont-axis"></span></figcaption>
   </figure>
-  <p class="takeaway" id="truth-takeaway"></p>
-</section>
-
-<!-- ---------------------------------------------------------------- 2 -->
-<section class="claim" id="strata">
-  <p class="kicker">Choice 2 · reporting one number or many</p>
-  <h2>A headline recall hides where a caller actually fails</h2>
-  <p>The same calls against v4.2.1, broken down by GIAB's genome stratifications. The overall figure is dominated by easy sequence; the difficult parts of the genome — repeats, segmental duplications, low mappability, the MHC — are where callers differ and where clinically relevant variants hide.</p>
-  <figure class="chart" data-chart="strata">
-    <div class="chart-head">
-      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall in the stratum</span><span><i style="background:var(--muted);border-radius:0;width:12px;height:2px"></i>Overall recall</span></div>
-      <button class="table-toggle" type="button">Show table</button>
-    </div>
-    <div class="facets"></div>
-    <figcaption>PASS calls on chr1-22 against GIAB v4.2.1. Each query is stratified only by its own sample's genome-specific regions — another genome's difficult regions say nothing about this one's calls.</figcaption>
-  </figure>
-  <p class="takeaway" id="strata-takeaway"></p>
+  <p class="takeaway" id="ont-takeaway"></p>
 </section>
 
 <!-- ---------------------------------------------------------------- 3 -->
-<section class="claim" id="refine">
-  <p class="kicker">Choice 3 · comparing records or haplotypes</p>
-  <h2>Structural variants: the same event can be written more than one way</h2>
-  <p>GIAB v5.0q, unlike earlier benchmarks, keeps complex SVs — and a complex event has several valid representations. A caller that writes it differently from the truth is scored as a miss plus a false call, unless the comparison re-aligns the region and compares haplotypes instead of records. GIAB's own README for v5.0q recommends exactly that:</p>
-  <pre class="cmd"><code>truvari bench --refine --pick ac -r 2000 -C 5000</code></pre>
-  <figure class="chart" data-chart="sv">
-    <div class="chart-head">
-      <div class="legend" id="sv-legend"></div>
-      <button class="table-toggle" type="button">Show table</button>
-    </div>
-    <div class="facets"></div>
-    <figcaption>SV recall for HG002, PASS calls, truvari 5.4.0 with <code>--dup-to-ins</code> and <code>--max-resolve 50000</code>. All chromosomes in the truth BED.</figcaption>
-  </figure>
-  <div class="pending" id="sv-pending" hidden></div>
-  <p class="takeaway" id="sv-takeaway"></p>
+<section class="claim" id="settings">
+  <p class="kicker">What thoth sets, and why</p>
+  <h2>Defaults thoth changes, each for a measured reason</h2>
+  <p>Each row is covered by a planted-truth test, run on every change to thoth: a small synthetic genome whose right answer is known exactly.</p>
+  <table class="settings">
+    <thead><tr><th>Setting</th><th>Without it</th><th>What thoth does</th></tr></thead>
+    <tbody>
+      <tr><td>truvari <code>--refine</code> for v5.0q</td><td data-label="Without it">A 300 bp deletion written as two 150 bp deletions scores 0&nbsp;% recall.</td><td data-label="thoth">Compares haplotypes: 100&nbsp;%. Bench is kept beside it.</td></tr>
+      <tr><td>truvari <code>--dup-to-ins</code></td><td data-label="Without it">A <code>&lt;DUP&gt;</code> never matches: GIAB's truth has no DUP records.</td><td data-label="thoth">Scores it as the insertion it is.</td></tr>
+      <tr><td>truvari <code>--max-resolve 50000</code></td><td data-label="Without it">Symbolic SVs above 25 kb skip the sequence check.</td><td data-label="thoth">Compares every SV up to the 50 kb size limit on sequence.</td></tr>
+      <tr><td>Drop <code>ALT=*</code> from SV truth</td><td data-label="Without it">truvari miscategorises v5.0q's spanning-deletion placeholders, as GIAB warns.</td><td data-label="thoth">Removes them before comparison.</td></tr>
+      <tr><td>Own-sample stratification</td><td data-label="Without it">Every query gets all seven GIAB genomes' genome-specific strata.</td><td data-label="thoth">Keeps the query sample's own; 27&nbsp;% fewer intervals in hap.py's memory.</td></tr>
+      <tr><td>Keep half-calls</td><td data-label="Without it"><code>-e 'GT="ref" || GT="mis"'</code> and <code>-i 'GT="alt"'</code> both drop <code>./1</code> calls.</td><td data-label="thoth"><code>-i 'GT~"[1-9]"'</code> keeps every call with an ALT allele.</td></tr>
+      <tr><td>hap.py reference with ambiguity codes as N</td><td data-label="Without it">vcfeval stops at GRCh38's IUPAC bases: ONT's HG002 calls cannot be scored against v5.0q.</td><td data-label="thoth">Gives hap.py a copy with those bases as N; every other step reads the original.</td></tr>
+    </tbody>
+  </table>
 </section>
 
 <!-- ---------------------------------------------------------------- 4 -->
+<section class="claim" id="refine">
+  <p class="kicker">Choice 1 · comparing records or haplotypes</p>
+  <h2>The same structural variant can be written more than one way</h2>
+  <p>v5.0q keeps complex SVs; record by record, a call written differently from the truth counts as a miss and a false call. GIAB's v5.0q README recommends:</p>
+  <pre class="cmd"><code>truvari bench --refine --pick ac -r 2000 -C 5000</code></pre>
+  <p class="takeaway"><span id="refine-takeaway"></span> <a href="#thoth-way">Plot above.</a></p>
+</section>
+
+<!-- ---------------------------------------------------------------- 5 -->
 <section class="claim" id="seqsim">
-  <p class="kicker">Choice 4 · reading a threshold</p>
-  <h2>A 70 % sequence-similarity threshold passes unrelated sequence</h2>
-  <p>truvari's default <code>pctseq 0.7</code> sounds strict. But its similarity is <code>(len_a + len_b − edit distance) / (len_a + len_b)</code>, and under that measure two <em>completely unrelated</em> random sequences of the same length score 71–74 % (median, 50 bp to 5 kb). From 200 bp, every such pair passes. An insertion of the right size at the right place is matched whatever its sequence — so SV insertion precision is really a size-and-position precision.</p>
+  <p class="kicker">Choice 2 · reading a threshold</p>
+  <h2>truvari's default sequence-similarity threshold passes unrelated sequence</h2>
+  <p>truvari's default <code>pctseq 0.7</code> sounds strict, but its similarity is <code>(len_a + len_b − edit distance)</code> / <code>(len_a + len_b)</code>: unrelated random sequences of equal length score <span id="seqsim-median"></span> (median). From <span id="seqsim-all"></span> every such pair passes, so an insertion of the right size and place matches whatever its sequence: SV insertion precision is largely size-and-position precision.</p>
   <figure class="chart" data-chart="seqsim">
     <div class="chart-head">
       <div class="legend"><span><i style="background:var(--series-1)"></i>Median, unrelated pairs</span><span><i style="background:var(--band);border-radius:2px;width:14px"></i>5th–95th percentile</span></div>
@@ -230,68 +250,9 @@ svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-wid
   </figure>
 </section>
 
-<!-- ---------------------------------------------------------------- 5 -->
-<section class="claim" id="settings">
-  <p class="kicker">What thoth sets, and why</p>
-  <h2>Defaults thoth changes, each for a measured reason</h2>
-  <p>Each row is covered by a planted-truth test that runs on every change to thoth: a small synthetic genome where the right answer is known exactly, so any drift in behaviour fails the build.</p>
-  <table class="settings">
-    <thead><tr><th>Setting</th><th>Left at the default</th><th>What thoth does</th></tr></thead>
-    <tbody>
-      <tr><td>truvari <code>--refine</code> for v5.0q</td><td>A 300 bp deletion written as two adjacent 150 bp deletions scores 0 % recall.</td><td>Re-aligns the region and compares haplotypes: 100 %. Both results are kept, so the gap is visible.</td></tr>
-      <tr><td>truvari <code>--dup-to-ins</code></td><td>GIAB's truth has no DUP records, so a caller's <code>&lt;DUP&gt;</code> can never match: one false positive and one false negative per duplication.</td><td>Treats DUP as the insertion it is, sequence-resolved against the reference: matched at 100 % similarity.</td></tr>
-      <tr><td>truvari <code>--max-resolve 50000</code></td><td>Symbolic SVs above 25 kb are not resolved, so their sequence check is silently skipped.</td><td>Resolves up to the same 50 kb that bounds the comparison, so every SV in scope is compared on sequence.</td></tr>
-      <tr><td>Drop <code>ALT=*</code> from SV truth</td><td>Spanning-deletion placeholders in v5.0q are often miscategorised by truvari bench, as GIAB's README warns.</td><td>Removed from every SV truth VCF before comparison.</td></tr>
-      <tr><td>Own-sample stratification</td><td>Every query reports all seven GIAB genomes' genome-specific strata — rows that describe someone else's genome.</td><td>Keeps only the query sample's own; that also removed 27 % of the 224 million intervals hap.py holds in memory.</td></tr>
-      <tr><td>Keep half-calls</td><td>The common filter <code>-e 'GT="ref" || GT="mis"'</code> drops <code>./1</code> calls whose ALT is asserted present, inflating false negatives on joint callsets. bcftools treats any genotype with a missing allele as missing, so <code>-i 'GT="alt"'</code> drops them too.</td><td>Filters with <code>-i 'GT~"[1-9]"'</code>, which keeps any call carrying an ALT allele, half-calls included.</td></tr>
-      <tr><td>hap.py reference with ambiguity codes as N</td><td>hap.py rewrites the query's REF from the reference. GRCh38 keeps 94 IUPAC ambiguity bases (B, K, M, R, S, W, Y) where the truth sets and callers write N, so vcfeval stops on the first one: ONT's HG002 calls against v5.0q fail at chr3:16902879.</td><td>Gives hap.py a copy of the reference with those bases as N. Every other step reads the original FASTA.</td></tr>
-      <tr><td>SV truth for HG002 only</td><td>SV calls for other samples look scoreable but have no truth set; any number would be invented.</td><td>Skips them with a note. GIAB publishes SV benchmarks for HG002 alone.</td></tr>
-    </tbody>
-  </table>
-</section>
-
-<!-- ---------------------------------------------------------------- ONT -->
-<section class="claim" id="ont" hidden>
-  <p class="kicker">Checked against a published benchmark</p>
-  <h2>ONT's published GIAB numbers, reproduced, then scored thoth's way</h2>
-  <p>Oxford Nanopore published hap.py and truvari results for its GIAB 2025.01 release. Rescoring ONT's own public calls should give those numbers back before thoth's settings are set beside ONT's.</p>
-  <ul class="points">
-    <li><strong>Small variants.</strong> thoth scored ONT's published Clair3 calls for all seven samples against GIAB v4.2.1: <span id="ont-small"></span> Where traced (HG004, chr20–22), the residue is in the input: ONT benchmarked an earlier call set than the file it published, and thoth scores that earlier set exactly as ONT did.</li>
-    <li><strong>Structural variants.</strong> ONT's settings are unpublished; recovered from its output files, they are the GIAB draft benchmark V0.018 as truth and truvari 4.3.1 <code>bench --pick ac --passonly</code>, then <code>refine --recount</code>. Rerun on ONT's public Sniffles calls, <span id="ont-sv"></span> The published calls are a later version, phased differently in places, which only refine sees.</li>
-    <li><strong>What thoth changes.</strong> The matching window GIAB recommends for this benchmark (<code>-r 2000 -C 5000</code>, see <a href="#refine">above</a>; ONT kept the defaults 500 and 1000) and the current truvari 5. On the same truth, bench <span id="ont-bench"></span> For refine, thoth divides by every truth SV, as bench does; <code>--recount</code> re-derives the truth inside the realigned regions, so <span id="ont-recount"></span> The two refine recalls are not on the same scale.</li>
-  </ul>
-  <figure class="chart" data-chart="ont">
-    <div class="chart-head">
-      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall</span><span><i style="background:var(--series-2)"></i>Precision</span></div>
-      <button class="table-toggle" type="button">Show table</button>
-    </div>
-    <div class="facets stack"></div>
-    <figcaption>HG002, ONT's Sniffles calls (flow cell PAW70337), PASS only. ONT's rows: truvari 4.3.1; thoth's: truvari 5.4.0 with its v5.0q settings. ONT's refine rows are in the table, not on the axis: their truth total is <code>--recount</code>'s. <span id="ont-axis"></span></figcaption>
-  </figure>
-  <p class="takeaway" id="ont-takeaway"></p>
-  <figure class="chart" data-chart="ont-small">
-    <div class="chart-head">
-      <p class="facet-title">Small variants: ONT's published hap.py summary beside thoth's, per sample</p>
-      <button class="table-toggle" type="button">Show table</button>
-    </div>
-  </figure>
-  <p>The recovered recipe and how it was confirmed, the exact commands for both recipes, the refine arithmetic and the small-variant investigation: <a href="https://github.com/martinandclaude/thoth/blob/main/docs/data/README.md">docs/data/README.md</a>.</p>
-</section>
-
-<!-- ---------------------------------------------------------------- 6 -->
-<section class="claim" id="reproducible">
-  <p class="kicker">Reproducible by construction</p>
-  <h2>Every number can be traced to the exact bytes that produced it</h2>
-  <p>Each variant tool thoth runs is published by this repository's own CI as a single container image file: bcftools, samtools and truvari built from pinned sources, hap.py converted unchanged from a community image pinned by digest. Each file is tested, given a signed build-provenance attestation, and published by content digest. A cluster only downloads and verifies those files; it never builds or converts anything. Each run writes a provenance record with the commit, the merged configuration, every image digest and the checksum of every truth file used.</p>
-  <div id="run-record" hidden></div>
-  <div class="actions" style="justify-content:flex-start">
-    <a class="btn primary" href="https://github.com/martinandclaude/thoth#quick-start">Quick start</a>
-    <a class="btn" href="https://github.com/martinandclaude/thoth/actions">Build and test history</a>
-  </div>
-</section>
-
 <footer>
-  <p>thoth · <a href="https://github.com/martinandclaude/thoth">github.com/martinandclaude/thoth</a> · results: GIAB HG002, Oxford Nanopore</p>
+  <p>thoth · <a href="https://github.com/martinandclaude/thoth">github.com/martinandclaude/thoth</a> · benchmark results: Oxford Nanopore's public GIAB 2025.01 calls</p>
+  <p>How containers, truth files and runs are pinned and traced: <a href="https://github.com/martinandclaude/thoth#containers">README</a>.</p>
   <p>Code under the <a href="https://github.com/martinandclaude/thoth/blob/main/LICENSE">MIT licence</a>. Logo generated with ChatGPT (OpenAI).</p>
 </footer>
 </div>
@@ -318,8 +279,10 @@ svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-wid
 
 // ---------------------------------------------------------------- helpers
 const NS = "http://www.w3.org/2000/svg";
-const pct = (v, d = 1) => (100 * v).toFixed(d) + " %";
+const pct = (v, d = 1) => (100 * v).toFixed(d) + " %";
 const int = (v) => v.toLocaleString("en-US");
+const signed = (d) => (d > 0 ? "+" : d < 0 ? "−" : "") + int(Math.abs(d));
+const plural = (n, word) => `${int(n)} ${word}${n === 1 ? "" : "s"}`;
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
@@ -329,6 +292,7 @@ function el(tag, attrs = {}, parent) {
 function text(parent, x, y, str, attrs = {}) {
   const t = el("text", { x, y, ...attrs }, parent); t.textContent = str; return t;
 }
+function set(id, str) { document.getElementById(id).textContent = str; }
 const tip = document.getElementById("tooltip");
 function showTip(evt, rows) {
   tip.replaceChildren();
@@ -356,18 +320,15 @@ function bindTip(node, rowsFn) {
   node.addEventListener("blur", hideTip);
 }
 function cssVar(name) { return `var(${name})`; }
-// evidence.json entries by label (extract_evidence.py sets them), failing loudly on a miss.
-function pick(list, field, value) {
-  const hit = list.find((x) => x[field] === value);
-  if (!hit) throw new Error(`evidence.json has no ${field} "${value}"`);
-  return hit;
-}
 function pctRange(vals) {
   const lo = pct(Math.min(...vals), 0), hi = pct(Math.max(...vals), 0);
-  return lo === hi ? lo : `${lo.replace(" %", "")}–${hi}`;
+  return lo === hi ? lo : `${lo.replace(" %", "")}–${hi}`;
 }
 
-// Horizontal dot plot: rows of labels, one x scale, 1-2 dots per row.
+// Horizontal dot plot: rows of labels, one x scale, dots per row. A series with
+// `ring: true` is drawn as an open ring, before the dots, so a dot sits inside
+// the ring it agrees with. A series' optional `dy` shifts it within the row, so
+// two metrics with near-equal values do not hide each other.
 function dotPlot(container, { title, rows, domain, series, overall, width = 440, labelW = 150, ticks }) {
   if (title) { const t = document.createElement("p"); t.className = "facet-title"; t.textContent = title; container.appendChild(t); }
   // Draw at the container's real width (capped at the design width) so text
@@ -386,21 +347,23 @@ function dotPlot(container, { title, rows, domain, series, overall, width = 440,
   for (const t of ticks) {
     el("line", { x1: sx(t), x2: sx(t), y1: top - 4, y2: top + rows.length * rowH }, g);
     const tk = el("g", { class: "tick" }, svg);
-    text(tk, sx(t), top + rows.length * rowH + 16, (100 * t).toFixed(t * 100 % 1 ? 1 : 0) + "%", { "text-anchor": "middle" });
+    text(tk, sx(t), top + rows.length * rowH + 16, pct(t, t * 100 % 1 ? 1 : 0), { "text-anchor": "middle" });
   }
   if (overall !== undefined) {
     el("line", { x1: sx(overall), x2: sx(overall), y1: top - 4, y2: top + rows.length * rowH, stroke: cssVar("--muted"), "stroke-width": 2 }, svg);
   }
+  const drawn = [...series.filter((s) => s.ring), ...series.filter((s) => !s.ring)];
   rows.forEach((r, i) => {
     const cy = dotY(i);
-    text(svg, stacked ? x0 : 0, stacked ? cy - 13 : cy + 4, r.label, { class: "rowlabel", ...(r.strong ? { "font-weight": 650 } : {}) });
+    text(svg, stacked ? x0 : 0, stacked ? cy - 16 : cy + 4, r.label, { class: "rowlabel", ...(r.strong ? { "font-weight": 650 } : {}) });
     const vals = series.map((s) => r[s.key]).filter((v) => v !== undefined);
     if (vals.length > 1) el("line", { x1: sx(Math.min(...vals)), x2: sx(Math.max(...vals)), y1: cy, y2: cy, stroke: cssVar("--axis"), "stroke-width": 2 }, svg);
     const mark = el("g", { class: "mark" }, svg);
-    series.forEach((s) => {
+    drawn.forEach((s) => {
       const v = r[s.key]; if (v === undefined) return;
-      const cx = Math.max(x0, Math.min(x1, sx(v)));
-      el("circle", { class: "dot", cx, cy, r: 5, fill: cssVar(s.color) }, mark);
+      const cx = Math.max(x0, Math.min(x1, sx(v))), y = cy + (s.dy || 0);
+      if (s.ring) el("circle", { class: "ring", cx, cy: y, r: 7, stroke: cssVar(s.color) }, mark);
+      else el("circle", { class: "dot", cx, cy: y, r: 5, fill: cssVar(s.color) }, mark);
     });
     const hit = el("rect", { class: "hit", x: stacked ? 0 : x0 - 6, y: top + i * rowH, width: stacked ? width : x1 - x0 + 12, height: rowH }, mark);
     hit.setAttribute("aria-label", r.label + ": " + series.filter((s) => r[s.key] !== undefined).map((s) => s.name + " " + pct(r[s.key], 2)).join(", "));
@@ -413,6 +376,8 @@ function dotPlot(container, { title, rows, domain, series, overall, width = 440,
 }
 
 function tableToggle(fig, buildTable) {
+  if (fig.dataset.toggleBound) return;   // charts are redrawn on resize; bind once
+  fig.dataset.toggleBound = "1";
   const btn = fig.querySelector(".table-toggle");
   let table = null;
   btn.setAttribute("aria-expanded", "false");
@@ -443,89 +408,109 @@ const niceDomain = (vals, pad, step) => {
   const ticks = []; for (let v = lo; v <= hi + 1e-9; v += step) ticks.push(+v.toFixed(4));
   return { domain: [lo, hi], ticks };
 };
+// Recall and precision, each as a ring (the reference) and a dot (the rescore);
+// recall sits just above the row's line and precision just below it.
+const pairSeries = (ringName, dotName) => [
+  { key: "rRef", name: `Recall, ${ringName}`, color: "--series-1", ring: true, dy: -4 },
+  { key: "pRef", name: `Precision, ${ringName}`, color: "--series-2", ring: true, dy: 4 },
+  { key: "r", name: `Recall, ${dotName}`, color: "--series-1", dy: -4 },
+  { key: "p", name: `Precision, ${dotName}`, color: "--series-2", dy: 4 },
+];
 
-// ---------------------------------------------------------------- charts
-function chartTruth(ev) {
-  const fig = document.querySelector('[data-chart="truth"]'), box = fig.querySelector(".facets");
+// ---------------------------------------------------------------- 1: ONT's numbers given back
+function chartOntSmall(o) {
+  const fig = document.querySelector('[data-chart="ont-small"]'), box = fig.querySelector(".facets");
+  const series = pairSeries("ONT", "thoth"), starts = [];
+  for (const [vt, title] of [["SNP", "SNPs"], ["INDEL", "Indels"]]) {
+    const rows = o.small.filter((r) => r.type === vt).map((r) => ({ label: r.sample,
+      rRef: r.published.recall, pRef: r.published.precision, r: r.thoth.recall, p: r.thoth.precision,
+      detail: [`thoth − ONT: ${signed(r.thoth.tp - r.published.tp)} found, ${signed(r.thoth.fp - r.published.fp)} false calls`] }));
+    const vals = rows.flatMap((r) => [r.rRef, r.pRef, r.r, r.p]);
+    const { domain, ticks } = vt === "SNP" ? niceDomain(vals, 0.0005, 0.001) : niceDomain(vals, 0.01, 0.02);
+    const cell = document.createElement("div"); box.appendChild(cell);
+    dotPlot(cell, { title, rows, domain, series, ticks, labelW: 64 });
+    starts.push(pct(domain[0], domain[0] * 100 % 1 ? 1 : 0));
+  }
+  set("ont-small-axis", `SNP axis starts at ${starts[0]}, indel axis at ${starts[1]}.`);
+  const gap = Math.max(...o.small.flatMap((r) => ["recall", "precision"].map((k) => Math.abs(r.thoth[k] - r.published[k]))));
+  const same = o.small.filter((r) => r.thoth.truth_total === r.published.truth_total).length;
+  const gaps = o.small.flatMap((r) => ["tp", "fp"].map((k) => ({ r, k, d: r.thoth[k] - r.published[k] })));
+  const outliers = gaps.filter((g) => Math.abs(g.d) > 100), rest = gaps.filter((g) => Math.abs(g.d) <= 100);
+  const kind = (g) => `${g.r.sample} ${g.r.type === "SNP" ? "SNPs" : "indels"}, where thoth has ${int(Math.abs(g.d))} ` +
+    `${g.d < 0 ? "fewer" : "more"} ${g.k === "fp" ? "false" : "true"} calls`;
+  set("ont-small-takeaway", `${same} of ${o.small.length} truth totals are identical; recall and precision differ by at most ` +
+    `${(100 * gap).toFixed(3)} percentage points, and counts by at most ${int(Math.max(...rest.map((g) => Math.abs(g.d))))} per sample and type` +
+    `${outliers.length ? `, except ${outliers.map(kind).join(" and ")}` : ""}.`);
+  tableToggle(fig, () => makeTable(
+    ["Sample", "Flow cell", "Type", "Truth total", "Recall, ONT", "Recall, thoth", "Precision, ONT", "Precision, thoth", "Found, thoth − ONT", "False calls, thoth − ONT"],
+    o.small.map((r) => [r.sample, r.flowcell, r.type, r.thoth.truth_total === r.published.truth_total ? int(r.thoth.truth_total) : `${int(r.published.truth_total)} / ${int(r.thoth.truth_total)}`,
+      pct(r.published.recall, 2), pct(r.thoth.recall, 2), pct(r.published.precision, 2), pct(r.thoth.precision, 2),
+      signed(r.thoth.tp - r.published.tp), signed(r.thoth.fp - r.published.fp)]), 3));
+}
+
+const svRow = (o, who, method, truth = "GIAB draft V0.018") => o.sv.find((r) => r.scored_by === who && r.method === method && r.truth === truth);
+
+function chartOntSV(o) {
+  const fig = document.querySelector('[data-chart="ont-sv"]'), box = fig.querySelector(".facets");
+  const pub = (m) => svRow(o, "ONT, as published", m), rerun = (m) => svRow(o, "ONT's recipe, rerun", m);
+  const rows = [["bench", "Record by record (bench)"], ["refine", "Haplotype-aware (refine --recount)"]].map(([m, label]) => ({ label,
+    rRef: pub(m).recall, pRef: pub(m).precision, r: rerun(m).recall, p: rerun(m).precision,
+    detail: [`truth SVs: ${int(pub(m).base)} published, ${int(rerun(m).base)} rerun`] }));
+  const { domain, ticks } = niceDomain(rows.flatMap((r) => [r.rRef, r.pRef, r.r, r.p]), 0.01, 0.05);
+  const cell = document.createElement("div"); box.appendChild(cell);
+  dotPlot(cell, { rows, domain, ticks, series: pairSeries("ONT", "rerun"), labelW: 240, width: 700 });
+  set("ont-sv-axis", `Axis starts at ${pct(domain[0], 0)}.`);
+  const off = (k, m) => Math.abs(rerun(m)[k] - pub(m)[k]);
+  const exact = ["base", "tp", "fn", "fp"].every((k) => off(k, "bench") === 0);
+  set("ont-sv-takeaway", `${exact ? "Bench gives ONT's counts exactly" : `Bench lands within ${plural(off("base", "bench"), "truth SV")}`} ` +
+    `(recall ${pct(pub("bench").recall, 2)}, precision ${pct(pub("bench").precision, 2)}); refine is within ` +
+    `${plural(Math.max(off("base", "refine"), off("tp", "refine")), "truth SV")} and ${plural(off("fp", "refine"), "false call")} of ONT's counts ` +
+    `(recall ${pct(pub("refine").recall, 2)}).`);
+  tableToggle(fig, () => makeTable(["Scored by", "Comparison", "Truth SVs", "Found", "Missed", "False calls", "Recall", "Precision"],
+    o.sv.filter((r) => r.scored_by !== "thoth").map((r) => [r.scored_by, r.method, int(r.base), int(r.tp), int(r.fn), int(r.fp), pct(r.recall, 2), pct(r.precision, 2)]), 2));
+}
+
+// ---------------------------------------------------------------- 2: thoth's way
+function chartThothWay(o) {
+  const pub = (m) => svRow(o, "ONT, as published", m);
+  set("ont-refine-recall", pct(pub("refine").recall, 2)); set("ont-refine-base", int(pub("refine").base));
+  set("ont-bench-base", int(pub("bench").base));
+  const fig = document.querySelector('[data-chart="ont"]'), box = fig.querySelector(".facets");
   const series = [{ key: "recall", name: "Recall", color: "--series-1" }, { key: "precision", name: "Precision", color: "--series-2" }];
-  for (const vt of ["SNP", "INDEL"]) {
-    const rows = ev.truth_sets.map((t) => ({ label: t.truth.replace("GIAB ", ""), recall: t[vt].recall, precision: t[vt].precision,
-      detail: [`${int(t[vt].tp)} true positives of ${int(t[vt].truth_total)}`, `${int(t[vt].fn)} missed · ${int(t[vt].fp)} false calls`] }));
-    const vals = rows.flatMap((r) => [r.recall, r.precision]);
-    const { domain, ticks } = vt === "SNP" ? niceDomain(vals, 0.001, 0.005) : niceDomain(vals, 0.01, 0.05);
-    const cell = document.createElement("div"); box.appendChild(cell);
-    dotPlot(cell, { title: vt === "SNP" ? "SNPs" : "Indels", rows, domain, series, ticks, labelW: 120 });
-  }
-  tableToggle(fig, () => makeTable(["Truth set", "Type", "Recall", "Precision", "True positives", "Missed", "False calls"],
-    ev.truth_sets.flatMap((t) => ["SNP", "INDEL"].map((vt) => [t.truth, vt, pct(t[vt].recall, 2), pct(t[vt].precision, 2), int(t[vt].tp), int(t[vt].fn), int(t[vt].fp)])), 2));
-  const a = pick(ev.truth_sets, "truth", "GIAB v4.2.1").INDEL.recall, b = pick(ev.truth_sets, "truth", "GIAB v5.0q").INDEL.recall;
-  document.getElementById("truth-takeaway").textContent =
-    `Indel recall for the same calls: ${pct(a)} against v4.2.1, ${pct(b)} against v5.0q. A benchmark number without its truth set and version is not a result.`;
-}
-
-function chartStrata(ev) {
-  const fig = document.querySelector('[data-chart="strata"]'), box = fig.querySelector(".facets");
-  const series = [{ key: "recall", name: "Recall", color: "--series-1" }];
-  const overall = pick(ev.strata, "stratum", "All benchmark regions");
-  for (const vt of ["SNP", "INDEL"]) {
-    const rows = ev.strata.map((s) => ({ label: s.stratum, strong: s === overall, recall: s[vt].recall,
-      detail: [`${int(s[vt].fn)} missed of ${int(s[vt].truth_total)}`] }));
-    const vals = rows.map((r) => r.recall);
-    const { domain, ticks } = vt === "SNP" ? niceDomain(vals, 0.002, 0.01) : niceDomain(vals, 0.01, 0.05);
-    const cell = document.createElement("div"); box.appendChild(cell);
-    dotPlot(cell, { title: vt === "SNP" ? "SNPs" : "Indels", rows, domain, series, ticks, overall: overall[vt].recall, labelW: 230, width: 470 });
-  }
-  tableToggle(fig, () => makeTable(["Stratum", "SNP recall", "SNP missed", "Indel recall", "Indel missed"],
-    ev.strata.map((s) => [s.stratum, pct(s.SNP.recall, 2), int(s.SNP.fn), pct(s.INDEL.recall, 2), int(s.INDEL.fn)])));
-  const worst = [...ev.strata].sort((p, q) => p.SNP.recall - q.SNP.recall)[0];
-  document.getElementById("strata-takeaway").textContent =
-    `Overall SNP recall is ${pct(overall.SNP.recall, 2)}; in "${worst.stratum}" it is ${pct(worst.SNP.recall, 2)}. ` +
-    `Indel recall is ${pct(pick(ev.strata, "stratum", "Easy: outside every difficult region").INDEL.recall, 2)} in easy sequence and ` +
-    `${pct(pick(ev.strata, "stratum", "Tandem repeats and homopolymers").INDEL.recall, 2)} in repeats and homopolymers.`;
-}
-
-function chartSV(ev) {
-  const fig = document.querySelector('[data-chart="sv"]'), box = fig.querySelector(".facets");
-  const legend = document.getElementById("sv-legend");
-  const refined = ev.sv_refine && ev.sv_refine.length;
-  const addKey = (color, label) => { const s = document.createElement("span"); const i = document.createElement("i"); i.style.background = color; s.append(i, label); legend.appendChild(s); };
-  const v5 = (list) => (list || []).filter((r) => r.truth.includes("v5.0q"));
-  if (refined) {
-    addKey(cssVar("--series-2"), "Record by record (bench)"); addKey(cssVar("--series-1"), "Haplotype-aware (refine)");
-    const bench = v5(ev.sv_refine_bench), ref = v5(ev.sv_refine);
-    const na = (v) => (v === undefined ? "n/a" : pct(v));
-    const rows = bench.map((b) => { const r = ref.find((x) => x.caller === b.caller) || {};
-      return { label: b.caller, bench: b.recall, refine: r.recall, benchP: b.precision, refineP: r.precision,
-        detail: [`bench precision ${pct(b.precision)} · refine precision ${na(r.precision)}`] }; });
-    const { domain, ticks } = niceDomain(rows.flatMap((r) => [r.bench, r.refine]).filter((v) => v !== undefined), 0.02, 0.05);
-    const cell = document.createElement("div"); box.appendChild(cell);
-    dotPlot(cell, { title: "Recall against GIAB v5.0q", rows, domain, ticks, labelW: 130, width: 700,
-      series: [{ key: "bench", name: "Record by record", color: "--series-2" }, { key: "refine", name: "Haplotype-aware", color: "--series-1" }] });
-    tableToggle(fig, () => makeTable(["Caller", "Bench recall", "Refine recall", "Bench precision", "Refine precision"],
-      rows.map((r) => [r.label, pct(r.bench), na(r.refine), pct(r.benchP), na(r.refineP)])));
-    const gains = rows.map((r) => `${r.label} ${pct(r.bench)} → ${na(r.refine)}`).join(", ");
-    document.getElementById("sv-takeaway").textContent = `Recall against v5.0q, record by record versus haplotype-aware: ${gains}.`;
-  } else {
-    addKey(cssVar("--series-1"), "Recall"); addKey(cssVar("--series-2"), "Precision");
-    const rows = ev.sv_bench.map((r) => ({ label: `${r.caller} · ${r.truth.replace("GIAB ", "")}`, recall: r.recall, precision: r.precision,
+  // ONT's refine rows are over --recount's truth total, not every truth SV: table only, not this axis.
+  // The rerun's bench row equals the published one (section 1), so it is plotted once.
+  const plotted = o.sv.filter((r) => r.scored_by === "thoth" || (r.scored_by === "ONT, as published" && r.method === "bench"));
+  const { domain, ticks } = niceDomain(plotted.flatMap((r) => [r.recall, r.precision]), 0.01, 0.05);
+  const who = (r) => (r.scored_by === "thoth" ? "thoth" : "ONT's recipe");
+  const label = (r) => `${who(r)} · ${r.truth.replace("GIAB ", "").replace("draft ", "")} · ${int(r.base)} truth SVs`;
+  for (const [method, title] of [["bench", "Record by record (bench)"], ["refine", "Haplotype-aware (refine)"]]) {
+    const rows = plotted.filter((r) => r.method === method).map((r) => ({ label: label(r), recall: r.recall, precision: r.precision,
       detail: [`${int(r.tp)} of ${int(r.base)} truth SVs found`, `${int(r.fn)} missed · ${int(r.fp)} false calls`] }));
-    const { domain, ticks } = niceDomain(rows.flatMap((r) => [r.recall, r.precision]), 0.02, 0.05);
     const cell = document.createElement("div"); box.appendChild(cell);
-    dotPlot(cell, { title: "Record-by-record comparison (bench)", rows, domain, ticks, labelW: 190, width: 700,
-      series: [{ key: "recall", name: "Recall", color: "--series-1" }, { key: "precision", name: "Precision", color: "--series-2" }] });
-    tableToggle(fig, () => makeTable(["Caller", "Truth set", "Recall", "Precision", "Found", "Missed", "False calls"],
-      ev.sv_bench.map((r) => [r.caller, r.truth, pct(r.recall), pct(r.precision), int(r.tp), int(r.fn), int(r.fp)]), 2));
-    const p = document.getElementById("sv-pending"); p.hidden = false;
-    const truths = [...new Set(ev.sv_bench.map((r) => r.truth))];
-    const recall = truths.map((t) => `${pctRange(ev.sv_bench.filter((r) => r.truth === t).map((r) => r.recall))} on ${t.replace("GIAB ", "")}`);
-    p.textContent = "The haplotype-aware (refine) comparison of these calls is not published yet, so this shows the record-by-record result: " +
-      `recall ${recall.join(", ")}, with precision ${pctRange(ev.sv_bench.map((r) => r.precision))}.`;
+    dotPlot(cell, { title, rows, domain, series, ticks, labelW: 280, width: 700 });
   }
+  set("ont-axis", `Axis starts at ${pct(domain[0], 0)}.`);
+  tableToggle(fig, () => makeTable(["Scored by", "Truth", "Comparison", "Truth SVs", "Found", "Missed", "False calls", "Recall", "Precision"],
+    o.sv.map((r) => [r.scored_by, r.truth, r.method, int(r.base), int(r.tp), int(r.fn), int(r.fp), pct(r.recall, 2), pct(r.precision, 2)]), 3));
+  const v018 = svRow(o, "thoth", "bench");
+  const v5 = { bench: svRow(o, "thoth", "bench", "GIAB v5.0q"), refine: svRow(o, "thoth", "refine", "GIAB v5.0q") };
+  set("ont-takeaway", `On the same V0.018 truth, bench recall goes from ${pct(pub("bench").recall, 2)} to ${pct(v018.recall, 2)} and precision from ` +
+    `${pct(pub("bench").precision, 2)} to ${pct(v018.precision, 2)}. Against GIAB v5.0q: recall ${pct(v5.bench.recall, 2)} record by record ` +
+    `and ${pct(v5.refine.recall, 2)} haplotype-aware, precision ${pct(v5.bench.precision, 2)} and ${pct(v5.refine.precision, 2)}, ` +
+    `all ${int(v5.refine.base)} truth SVs counted.`);
+  // Choice 1 gives the effect of refine as a difference, pointing back to this plot.
+  const pp = (k) => (100 * (v5.refine[k] - v5.bench[k])).toFixed(2);
+  set("refine-takeaway", `On ONT's HG002 Sniffles calls against v5.0q, refine adds ${pp("recall")} percentage points of recall ` +
+    `and ${pp("precision")} of precision over the same ${int(v5.refine.base)} truth SVs.`);
 }
 
+// ---------------------------------------------------------------- 5: seqsim
 function chartSeqsim(ev) {
   const fig = document.querySelector('[data-chart="seqsim"]'), box = fig.querySelector(".facets");
   const d = ev.seqsim_baseline, rows = d.rows;
+  const len = (n) => (n >= 1000 ? `${n / 1000} kb` : `${n} bp`);
+  set("seqsim-median", pctRange(rows.map((r) => r.median)));
+  set("seqsim-all", len(rows.find((r) => r.share_at_or_above_0_7 === 1).length));
   const width = Math.min(700, Math.max(300, box.clientWidth || 700)), h = 260, m = { l: 48, r: 16, t: 14, b: 40 };
   const narrow = width < 520;
   const svg = el("svg", { class: "plot", viewBox: `0 0 ${width} ${h}`, role: "img",
@@ -537,11 +522,11 @@ function chartSeqsim(ev) {
   const g = el("g", { class: "grid" }, svg);
   for (const t of [0.6, 0.65, 0.7, 0.75, 0.8]) {
     el("line", { x1: m.l, x2: width - m.r, y1: sy(t), y2: sy(t) }, g);
-    text(el("g", { class: "tick" }, svg), m.l - 8, sy(t) + 4, (100 * t).toFixed(0) + "%", { "text-anchor": "end" });
+    text(el("g", { class: "tick" }, svg), m.l - 8, sy(t) + 4, pct(t, 0), { "text-anchor": "end" });
   }
   for (const r of rows) {
-    if (narrow && (r.length === 200 || r.length === 2000)) continue;   // keep tick labels apart on a phone
-    text(el("g", { class: "tick" }, svg), sx(r.length), h - m.b + 18, r.length >= 1000 ? r.length / 1000 + " kb" : r.length + " bp", { "text-anchor": "middle" });
+    if (narrow && ![50, 200, 1000, 5000].includes(r.length)) continue;   // keep tick labels apart on a phone
+    text(el("g", { class: "tick" }, svg), sx(r.length), h - m.b + 18, len(r.length), { "text-anchor": "middle" });
   }
   text(svg, (m.l + width - m.r) / 2, h - 4, "Length of each sequence (log scale)", { "text-anchor": "middle" });
   // band and median
@@ -550,10 +535,10 @@ function chartSeqsim(ev) {
   el("polyline", { points: rows.map((r) => `${sx(r.length)},${sy(r.median)}`).join(" "), fill: "none", stroke: cssVar("--series-1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
   // the threshold: a reference rule in ink, labelled -- not a series
   el("line", { x1: m.l, x2: width - m.r, y1: sy(d.threshold), y2: sy(d.threshold), stroke: cssVar("--ink-2"), "stroke-width": 1.5 }, svg);
-  text(svg, width - m.r, sy(d.threshold) + 16, narrow ? "pctseq 0.7: above passes" : "pctseq 0.7 (default): pairs above this line pass", { "text-anchor": "end", fill: cssVar("--ink"), "font-weight": 600 });
+  text(svg, width - m.r, sy(d.threshold) + 16, narrow ? `pctseq ${d.threshold}: above passes` : `pctseq ${d.threshold} (default): pairs above this line pass`, { "text-anchor": "end", fill: cssVar("--ink"), "font-weight": 600 });
   // crosshair hover
   const cross = el("line", { y1: m.t, y2: h - m.b, stroke: cssVar("--axis"), "stroke-width": 1, visibility: "hidden" }, svg);
-  const dots = rows.map((r) => el("circle", { class: "dot", cx: sx(r.length), cy: sy(r.median), r: 4, fill: cssVar("--series-1") }, svg));
+  rows.forEach((r) => el("circle", { class: "dot", cx: sx(r.length), cy: sy(r.median), r: 4, fill: cssVar("--series-1") }, svg));
   const hit = el("rect", { class: "hit", x: m.l, y: m.t, width: width - m.l - m.r, height: h - m.t - m.b }, svg);
   hit.setAttribute("aria-label", "Similarity by length; use the table for exact values");
   const nearest = (clientX) => {
@@ -565,8 +550,8 @@ function chartSeqsim(ev) {
     cross.setAttribute("x1", sx(r.length)); cross.setAttribute("x2", sx(r.length)); cross.setAttribute("visibility", "visible");
     showTip(e, [{ color: cssVar("--series-1"), value: pct(r.median), label: "median similarity" },
       { label: `5th–95th percentile ${pct(r.p05)}–${pct(r.p95)}` },
-      { label: `${pct(r.share_at_or_above_0_7, 0)} of ${r.pairs} unrelated pairs pass 0.7` },
-      { label: `${r.length.toLocaleString("en-US")} bp sequences` }]);
+      { label: `${pct(r.share_at_or_above_0_7, 0)} of ${r.pairs} unrelated pairs pass ${d.threshold}` },
+      { label: `${int(r.length)} bp sequences` }]);
   };
   hit.addEventListener("pointermove", (e) => show(e, nearest(e.clientX)));
   hit.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
@@ -575,92 +560,31 @@ function chartSeqsim(ev) {
   // direct label on the endpoint only
   const last = rows[rows.length - 1];
   text(svg, sx(last.length) - 6, sy(last.median) - 10, pct(last.median), { "text-anchor": "end", fill: cssVar("--ink"), "font-weight": 600 });
-  tableToggle(fig, () => makeTable(["Length", "Median", "5th pct", "95th pct", "Share passing 0.7"],
-    rows.map((r) => [int(r.length) + " bp", pct(r.median), pct(r.p05), pct(r.p95), pct(r.share_at_or_above_0_7, 0)])));
-  document.getElementById("seqsim-caption").textContent =
-    `Each length: ${rows[0].pairs} pairs of unrelated uniform-random sequences, scored with truvari's own similarity function (truvari 5.4.0). Axis starts at 60 %.`;
-}
-
-function chartONT(ev) {
-  const o = ev.ont; if (!o) return;
-  document.getElementById("ont").hidden = false;
-  const set = (id, str) => { document.getElementById(id).textContent = str; };
-  const signed = (d) => (d > 0 ? "+" : d < 0 ? "−" : "") + int(Math.abs(d));
-  // small variants: published against thoth, per sample and type
-  const gap = Math.max(...o.small.flatMap((r) => ["recall", "precision"].map((k) => Math.abs(r.thoth[k] - r.published[k]))));
-  const same = o.small.filter((r) => r.thoth.truth_total === r.published.truth_total).length;
-  const gaps = o.small.flatMap((r) => ["tp", "fp"].map((k) => ({ r, k, d: r.thoth[k] - r.published[k] })));
-  const outliers = gaps.filter((g) => Math.abs(g.d) > 100), rest = gaps.filter((g) => Math.abs(g.d) <= 100);
-  const bound = Math.max(...rest.map((g) => Math.abs(g.d)));
-  const kind = (g) => `${g.r.sample} ${g.r.type === "SNP" ? "SNPs" : "indels"}, where thoth has ${int(Math.abs(g.d))} ` +
-    `${g.d < 0 ? "fewer" : "more"} ${g.k === "fp" ? "false" : "true"} calls`;
-  set("ont-small", `${same} of ${o.small.length} truth totals are identical to ONT's, recall and precision differ by at most ` +
-    `${(100 * gap).toFixed(3)} percentage points, and counts by at most ${int(bound)} per sample and type` +
-    `${outliers.length ? `, except ${outliers.map(kind).join(" and ")}` : ""}.`);
-  // structural variants
-  const row = (who, method, truth = "GIAB draft V0.018") => o.sv.find((r) => r.scored_by === who && r.method === method && r.truth === truth);
-  const pub = { bench: row("ONT, as published", "bench"), refine: row("ONT, as published", "refine") };
-  const rerun = { bench: row("ONT's recipe, rerun", "bench"), refine: row("ONT's recipe, rerun", "refine") };
-  const off = (k, m) => Math.abs(rerun[m][k] - pub[m][k]);
-  const exact = ["base", "tp", "fn", "fp"].every((k) => off(k, "bench") === 0);
-  const plural = (n, word) => `${int(n)} ${word}${n === 1 ? "" : "s"}`;
-  const vs = (a, b) => (pct(a, 2) === pct(b, 2) ? `${pct(a, 2)} as published` : `${pct(a, 2)} against ${pct(b, 2)}`);
-  set("ont-sv", `${exact ? "bench gives ONT's counts exactly" : `bench lands within ${plural(off("base", "bench"), "truth SV")}`} ` +
-    `(recall ${pct(pub.bench.recall, 2)}, precision ${pct(pub.bench.precision, 2)}) and refine lands within ` +
-    `${plural(Math.max(off("base", "refine"), off("tp", "refine")), "truth SV")} and ${plural(off("fp", "refine"), "false call")} ` +
-    `(recall ${vs(rerun.refine.recall, pub.refine.recall)}, precision ${vs(rerun.refine.precision, pub.refine.precision)}).`);
-  const ours = { bench: row("thoth", "bench"), refine: row("thoth", "refine") };
-  set("ont-bench", `recall goes from ${pct(pub.bench.recall, 2)} to ${pct(ours.bench.recall, 2)} and precision from ` +
-    `${pct(pub.bench.precision, 2)} to ${pct(ours.bench.precision, 2)}.`);
-  set("ont-recount", `ONT's ${pct(pub.refine.recall, 2)} is over ${int(pub.refine.base)} truth SVs, not bench's ${int(pub.bench.base)}.`);
-  const fig = document.querySelector('[data-chart="ont"]'), box = fig.querySelector(".facets");
-  const series = [{ key: "recall", name: "Recall", color: "--series-1" }, { key: "precision", name: "Precision", color: "--series-2" }];
-  // ONT's refine rows are over --recount's truth total, not every truth SV: table only, not this axis
-  const plotted = o.sv.filter((r) => r.method === "bench" || r.scored_by === "thoth");
-  const { domain, ticks } = niceDomain(plotted.flatMap((r) => [r.recall, r.precision]), 0.01, 0.05);
-  const label = (r) => `${r.scored_by} · ${r.truth.replace("GIAB ", "").replace("draft ", "")} · ${int(r.base)} truth SVs`;
-  for (const [method, title] of [["bench", "Record by record (bench)"], ["refine", "Haplotype-aware (refine)"]]) {
-    const rows = plotted.filter((r) => r.method === method).map((r) => ({ label: label(r), recall: r.recall, precision: r.precision,
-      detail: [`${int(r.tp)} of ${int(r.base)} truth SVs found`, `${int(r.fn)} missed · ${int(r.fp)} false calls`] }));
-    const cell = document.createElement("div"); box.appendChild(cell);
-    dotPlot(cell, { title, rows, domain, series, ticks, labelW: 310, width: 700 });
-  }
-  set("ont-axis", `Axis starts at ${(100 * domain[0]).toFixed(0)} %.`);
-  tableToggle(fig, () => makeTable(["Scored by", "Truth", "Comparison", "Truth SVs", "Found", "Missed", "False calls", "Recall", "Precision"],
-    o.sv.map((r) => [r.scored_by, r.truth, r.method, int(r.base), int(r.tp), int(r.fn), int(r.fp), pct(r.recall, 2), pct(r.precision, 2)]), 3));
-  const v5 = { bench: row("thoth", "bench", "GIAB v5.0q"), refine: row("thoth", "refine", "GIAB v5.0q") };
-  set("ont-takeaway", `ONT's HG002 Sniffles calls on thoth's settings against GIAB v5.0q: recall ${pct(v5.bench.recall, 2)} record by record ` +
-    `and ${pct(v5.refine.recall, 2)} haplotype-aware, precision ${pct(v5.bench.precision, 2)} and ${pct(v5.refine.precision, 2)}, ` +
-    `with all ${int(v5.refine.base)} truth SVs counted.`);
-  tableToggle(document.querySelector('[data-chart="ont-small"]'), () => makeTable(
-    ["Sample", "Flow cell", "Type", "Truth total", "Recall, ONT", "Recall, thoth", "Precision, ONT", "Precision, thoth", "Found, thoth − ONT", "False calls, thoth − ONT"],
-    o.small.map((r) => [r.sample, r.flowcell, r.type, r.thoth.truth_total === r.published.truth_total ? int(r.thoth.truth_total) : `${int(r.published.truth_total)} / ${int(r.thoth.truth_total)}`,
-      pct(r.published.recall, 2), pct(r.thoth.recall, 2), pct(r.published.precision, 2), pct(r.thoth.precision, 2),
-      signed(r.thoth.tp - r.published.tp), signed(r.thoth.fp - r.published.fp)]), 3));
-}
-
-function runRecord(ev) {
-  if (!ev.provenance) return;
-  const rows = ev.provenance.flatMap((r, i) => {
-    const run = ev.provenance.length > 1 ? `Run ${i + 1}: ` : "";
-    return [[run + "metrics table", r.metrics_sha256], [run + "configuration", r.config_sha256],
-      ...(r.commit ? [[run + "thoth commit", r.describe || r.commit]] : []),
-      ...Object.entries(r.containers).map(([name, digest]) => [`${run}${name} image`, digest])];
-  });
-  const box = document.getElementById("run-record");
-  box.append(makeTable(["Behind the results on this page", "Identifier"], rows, 2));
-  box.hidden = false;
+  tableToggle(fig, () => makeTable(["Length", "Median", "5th pct", "95th pct", `Share passing ${d.threshold}`],
+    rows.map((r) => [int(r.length) + " bp", pct(r.median), pct(r.p05), pct(r.p95), pct(r.share_at_or_above_0_7, 0)])));
+  set("seqsim-caption", `Each length: ${rows[0].pairs} pairs of unrelated uniform-random sequences, scored with truvari's own similarity function (truvari 5.4.0). Axis starts at ${pct(y0, 0)}.`);
 }
 
 // ---------------------------------------------------------------- load
 fetch("data/evidence.json")
   .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then((ev) => {
-    document.getElementById("provenance").textContent =
-      `Results: GIAB ${ev.sample}, ${ev.technology} sequencing, ${(ev.provenance || []).length > 1 ? "two runs of the same calls" : "one run"}, scored by thoth. Caller names are the public tools used.`;
-    chartTruth(ev); chartStrata(ev); chartSV(ev); chartSeqsim(ev); chartONT(ev); runRecord(ev);
+    const samples = [...new Set(ev.ont.small.map((r) => r.sample))].sort();
+    set("source", `Benchmark results: Oxford Nanopore's public GIAB 2025.01 calls (${samples.length} samples, ${samples[0]}–${samples[samples.length - 1]}; SVs for HG002), scored by thoth.`);
+    const draw = () => {
+      document.querySelectorAll(".facets").forEach((f) => f.replaceChildren());
+      chartOntSmall(ev.ont); chartOntSV(ev.ont); chartThothWay(ev.ont); chartSeqsim(ev);
+    };
+    draw();
+    // Charts are drawn at their container's width: redraw when it changes enough to matter.
+    const probe = document.querySelector(".facets");
+    let drawnAt = probe.clientWidth, timer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { if (Math.abs(probe.clientWidth - drawnAt) > 40) { drawnAt = probe.clientWidth; draw(); } }, 150);
+    });
   })
-  .catch((err) => { document.getElementById("provenance").textContent = "Could not load results (" + err.message + ")."; });
+  .catch((err) => { set("source", "Could not load results (" + err.message + ")."); });
 </script>
 </body>
 </html>
