@@ -1,0 +1,50 @@
+# thoth resource manifest — the only place URLs live.
+#
+# kind:      smvar_vcf | smvar_bed | sv_vcf | sv_bed | strat_tar
+# dest:      path relative to config["resources_dir"]
+# index:     yes -> also fetch <url>.tbi
+# sha256:    of the file behind the published results. fetch_resource records
+#            the sha256 of what arrived; a run fails if it differs from this
+#            value. Empty = not pinned: the run records what arrived and says so.
+sample	reference	release	kind	dest	index	url	sha256
+#--- GIAB v4.2.1 small variants, GRCh38 ---------------------------------------
+HG001	GRCh38	v4.2.1	smvar_vcf	truth/HG001/GRCh38/v4.2.1/HG001_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/NA12878_HG001/NISTv4.2.1/GRCh38/HG001_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	93bc4c2c696eaf13515ab058caecc064bfed704f85bac7482330ca91bc730daa
+HG001	GRCh38	v4.2.1	smvar_bed	truth/HG001/GRCh38/v4.2.1/HG001_GRCh38_1_22_v4.2.1_benchmark.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/NA12878_HG001/NISTv4.2.1/GRCh38/HG001_GRCh38_1_22_v4.2.1_benchmark.bed	dc3485e60447a3e863c34dfc063c3710ea5ed5efae50855c5197ba62538263b9
+HG002	GRCh38	v4.2.1	smvar_vcf	truth/HG002/GRCh38/v4.2.1/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	adb4d4a50048aa13353a06b84fcfcbca09a5d17525efaa4cea44f8822e81175c
+HG002	GRCh38	v4.2.1	smvar_bed	truth/HG002/GRCh38/v4.2.1/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed	fba9a57c36ec88e5d14ea3e259c8866c7935f4998d3ec0fa2d6c3962da5b5575
+HG003	GRCh38	v4.2.1	smvar_vcf	truth/HG003/GRCh38/v4.2.1/HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG003_NA24149_father/NISTv4.2.1/GRCh38/HG003_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	a4f8fefa826f8d2c9457eacf6f4b2f6bfa29daef429d570ce04254c5e7b1121e
+HG003	GRCh38	v4.2.1	smvar_bed	truth/HG003/GRCh38/v4.2.1/HG003_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG003_NA24149_father/NISTv4.2.1/GRCh38/HG003_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed	652afd3046705af3200f9c87c255fef11bb212dd76c75a19999c9b2df8a3180c
+HG004	GRCh38	v4.2.1	smvar_vcf	truth/HG004/GRCh38/v4.2.1/HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG004_NA24143_mother/NISTv4.2.1/GRCh38/HG004_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	13c113d93eb2884ebb97573cbe558554d3fb0a8748a6d2263cf4616312ac14ff
+HG004	GRCh38	v4.2.1	smvar_bed	truth/HG004/GRCh38/v4.2.1/HG004_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG004_NA24143_mother/NISTv4.2.1/GRCh38/HG004_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed	88d1c926fdc8abd9c39b3e9fe2af3fc43dd67d284690a3dc6127b369d96bccad
+HG005	GRCh38	v4.2.1	smvar_vcf	truth/HG005/GRCh38/v4.2.1/HG005_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG005_NA24631_son/NISTv4.2.1/GRCh38/HG005_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	42a86ee9bf1ea1b8e4ee6a352fc24d7a52b9030c62ee56baeb978e3dff475cf4
+HG005	GRCh38	v4.2.1	smvar_bed	truth/HG005/GRCh38/v4.2.1/HG005_GRCh38_1_22_v4.2.1_benchmark.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG005_NA24631_son/NISTv4.2.1/GRCh38/HG005_GRCh38_1_22_v4.2.1_benchmark.bed	24141b618d3b33c1595e73c25e7958673a190482534bd28d0122af1f61758195
+HG006	GRCh38	v4.2.1	smvar_vcf	truth/HG006/GRCh38/v4.2.1/HG006_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG006_NA24694_father/NISTv4.2.1/GRCh38/HG006_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	dde81deeebbd2601421ca3682f98b06987dbd3aef80b6a1a379ab77adfc96805
+HG006	GRCh38	v4.2.1	smvar_bed	truth/HG006/GRCh38/v4.2.1/HG006_GRCh38_1_22_v4.2.1_benchmark.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG006_NA24694_father/NISTv4.2.1/GRCh38/HG006_GRCh38_1_22_v4.2.1_benchmark.bed	1140193050a4b9aa6bc4a057ff0dfc1b27613384a8400f9125cab6279df05510
+HG007	GRCh38	v4.2.1	smvar_vcf	truth/HG007/GRCh38/v4.2.1/HG007_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG007_NA24695_mother/NISTv4.2.1/GRCh38/HG007_GRCh38_1_22_v4.2.1_benchmark.vcf.gz	b4b9aa464639d98fcbe189107df774beca7817ca30a216419d17c3cddc323429
+HG007	GRCh38	v4.2.1	smvar_bed	truth/HG007/GRCh38/v4.2.1/HG007_GRCh38_1_22_v4.2.1_benchmark.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/ChineseTrio/HG007_NA24695_mother/NISTv4.2.1/GRCh38/HG007_GRCh38_1_22_v4.2.1_benchmark.bed	e8dcb609c8697c723b99daa14e7bf1d75d2c34eafa4d166c38d918a37013d4e9
+#--- HG002 v5.0q (Q100/T2T-based; supersedes v4.2.1 for HG002) ----------------
+# v5.0q/ sits directly under the sample directory: no NIST prefix, no
+# per-reference subdirectory.
+HG002	GRCh38	v5.0q	smvar_vcf	truth/HG002/GRCh38/v5.0q/HG002_GRCh38_v5.0q_smvar.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/v5.0q/HG002_GRCh38_v5.0q_smvar.vcf.gz	c7f9d7a4781f1f0a8a42ec54b051d6b95db1935c5e12318bae219740f9c50dc8
+HG002	GRCh38	v5.0q	smvar_bed	truth/HG002/GRCh38/v5.0q/HG002_GRCh38_v5.0q_smvar.benchmark.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/v5.0q/HG002_GRCh38_v5.0q_smvar.benchmark.bed	ef7d898dd421ea357bb9db915894ab3e5c6c1689e36ccf619befda4bbf1cef5b
+HG002	GRCh38	v5.0q	sv_vcf	truth/HG002/GRCh38/v5.0q/HG002_GRCh38_v5.0q_stvar.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/v5.0q/HG002_GRCh38_v5.0q_stvar.vcf.gz	d66b2d2496ff5418763813d3195599007dbff950514d10e5bc27b6c8b76e34b8
+HG002	GRCh38	v5.0q	sv_bed	truth/HG002/GRCh38/v5.0q/HG002_GRCh38_v5.0q_stvar.benchmark.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/v5.0q/HG002_GRCh38_v5.0q_stvar.benchmark.bed	2f75ce942e1dd9e1a443e4e04fac640104aae5e23fba24d7d3f2c1f1f9985b00
+#--- HG002 CMRG v1.00 (challenging medically-relevant genes) ------------------
+# Small variants and structural variants. GIAB publishes SV benchmarks for
+# HG002 only, so SV calls for any other sample resolve to no truth set and are
+# skipped with a note at parse time.
+HG002	GRCh38	CMRG_v1.00	smvar_vcf	truth/HG002/GRCh38/CMRG_v1.00/HG002_GRCh38_CMRG_smallvar_v1.00.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/CMRG_v1.00/GRCh38/SmallVariant/HG002_GRCh38_CMRG_smallvar_v1.00.vcf.gz	80f18efa283d953cfc615d30dd01b1ff80debcc46f52042b942da783acd48da2
+HG002	GRCh38	CMRG_v1.00	smvar_bed	truth/HG002/GRCh38/CMRG_v1.00/HG002_GRCh38_CMRG_smallvar_v1.00.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/CMRG_v1.00/GRCh38/SmallVariant/HG002_GRCh38_CMRG_smallvar_v1.00.bed	dc77803bb474802fd3213d2f3649076dc14675d3b3c0ae3284036be09d2813f7
+HG002	GRCh38	CMRG_v1.00	sv_vcf	truth/HG002/GRCh38/CMRG_v1.00/HG002_GRCh38_CMRG_SV_v1.00.vcf.gz	yes	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/CMRG_v1.00/GRCh38/StructuralVariant/HG002_GRCh38_CMRG_SV_v1.00.vcf.gz	06a8740ad93dd0ede325fcf04c85f687a835699da715c72bdcfade5d588fd19e
+HG002	GRCh38	CMRG_v1.00	sv_bed	truth/HG002/GRCh38/CMRG_v1.00/HG002_GRCh38_CMRG_SV_v1.00.bed	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/CMRG_v1.00/GRCh38/StructuralVariant/HG002_GRCh38_CMRG_SV_v1.00.bed	3306319595ffa472d8ba9a8ca8932304b01ec663e102900a61604410737ddf81
+#--- Stratifications ----------------------------------------------------------
+# Upstream names carry no version (genome-stratifications-<ref>@all.tar.gz in
+# the vN directory); dest adds it so two releases cannot collide on disk.
+#
+# GRCh37 and CHM13v2.0 are fetched only once truth rows for that reference
+# exist. The T2T token is CHM13 upstream and CHM13v2.0 here, the key
+# config['references'] uses; extract_stratifications strips the tarball's own
+# top-level directory rather than assuming the two agree.
+-	GRCh38	v3.6	strat_tar	strat/GRCh38/v3.6/genome-stratifications-GRCh38-v3.6.tar.gz	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/v3.6/genome-stratifications-GRCh38@all.tar.gz	c5a1eceac54aac2c438af21825223d2a71e64b3db6b1c9e923849babb38063d8
+-	GRCh37	v3.6	strat_tar	strat/GRCh37/v3.6/genome-stratifications-GRCh37-v3.6.tar.gz	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/v3.6/genome-stratifications-GRCh37@all.tar.gz	31ff0c6e5eb67f0e4dad24bb4a6f28398c6b68e939868f3120f2d430af646050
+-	CHM13v2.0	v3.6	strat_tar	strat/CHM13v2.0/v3.6/genome-stratifications-CHM13v2.0-v3.6.tar.gz	no	https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/genome-stratifications/v3.6/genome-stratifications-CHM13@all.tar.gz	04f301665038bac890bc6923e9a5c6d49d8a78e04609fd214d6353a1f4dc4f5c

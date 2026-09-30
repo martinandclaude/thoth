@@ -1,0 +1,22 @@
+# Site configuration -- copy to config/site.yaml (gitignored) and fill in.
+# Everything that differs between clusters lives here and nowhere else.
+
+# Shared, write-once directory for truth sets, stratifications, SDFs and the
+# container SIFs. About 10 GB; put it where every compute node can read it.
+resources_dir: /path/to/shared/giab_resources
+
+# Optional: where fetch_containers.sh puts the SIFs (default <resources_dir>/containers).
+# containers_dir: /path/to/shared/containers
+
+# Optional: the fetch rules run on the submit host unless this is false.
+# fetch_on_login_node: false   # login node has no outbound HTTPS; fetch_* then run as cluster jobs -- give them a partition with network via the profile's set-resources
+
+# Reference FASTAs, keyed by the `reference` value used in run-file queries.
+# Must be the same FASTA the query VCFs were called against. A .fai beside it is
+# built if missing. GIAB truth sets exist for GRCh38, GRCh37 and CHM13v2.0; the
+# manifest currently carries GRCh38 truth sets only.
+# A reference key must name the same FASTA everywhere this resources_dir is
+# shared; the SDF is keyed by the key alone.
+references:
+  GRCh38:
+    fasta: /path/to/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna

@@ -1,0 +1,55 @@
+# A run file. This is the YAML you hand the pipeline.
+#
+# run_id names the report and the share directory. Required when queries are
+# given; a plain name (letters, digits, . _ -).
+#
+# One entry per sample-on-a-reference. Required: name, sample, reference, and at
+# least one of vcf_small / vcf_sv.
+#
+#   vcf_small caller -> VCF of small variants (SNVs and indels), scored by hap.py
+#   vcf_sv    caller -> VCF of structural variants, scored by truvari
+#
+# sample is the GIAB ID as the manifest has it (HG001-HG007; NA12878 or NA24385
+# fail). Query and caller names are yours to choose; they become path components
+# and the `query` and `caller` columns in the metrics table (letters, digits, _
+# and - only). Per-arm outputs live in results/<query>/<caller>/<truth>/ and are
+# shared by every run file that uses that query name, so a query name must
+# always mean the same VCFs: use a new name for different inputs.
+#
+# Each caller is scored against every truth set the manifest has for the sample.
+# SV truth sets exist for HG002 only, so vcf_sv on another sample is skipped
+# with a note.
+#
+# Optional: origin (free-text label, copied to the metrics origin column), share,
+# score_field (hap.py ROC field, default small_variants.default_score_field),
+# notes (free text, recorded only in the merged config inside runinfo.json).
+#
+# share:  public   -> the annotated hap.py VCF (every small-variant TP, FP and FN)
+#                     is copied into results/share/<run_id>/ with the metrics
+#                     table; SV per-variant files are never staged
+#         internal -> metrics only
+#         default is `internal` -- you have to opt in, not opt out.
+# runinfo.json is never shared; MANIFEST.txt in the share directory records the
+# code version, config_sha256 and container digests.
+
+run_id: example-caller-comparison
+
+queries:
+  - name: ont-HG002
+    sample: HG002
+    reference: GRCh38
+    origin: ont-giab-open-data
+    share: public
+    vcf_small:
+      deepvariant: /path/to/calls/HG002/HG002.deepvariant.vcf.gz
+      clair3: /path/to/calls/HG002/HG002.clair3.vcf.gz
+    vcf_sv:
+      sniffles: /path/to/calls/HG002/HG002.sniffles.vcf.gz
+      cutesv: /path/to/calls/HG002/HG002.cutesv.vcf
+
+  - name: ont-HG003
+    sample: HG003
+    reference: GRCh38
+    origin: ont-giab-open-data
+    vcf_small:
+      deepvariant: /path/to/calls/HG003/HG003.deepvariant.vcf.gz

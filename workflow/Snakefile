@@ -1,0 +1,45 @@
+import os
+
+from snakemake.utils import min_version
+
+min_version("9.0")
+
+
+configfile: "config/config.yaml"
+
+
+# Site values (paths, never committed). Loaded here rather than passed on the
+# command line so that the run file, which IS passed there, is applied last.
+if os.path.exists("config/site.yaml"):
+
+    configfile: "config/site.yaml"
+
+
+include: "rules/common.smk"
+include: "rules/resources.smk"
+include: "rules/prep.smk"
+include: "rules/bench_small.smk"
+include: "rules/bench_sv.smk"
+include: "rules/report.smk"
+
+
+rule all:
+    """Benchmark every caller of every query against every applicable truth set."""
+    input:
+        require_arms,
+        f"{OUT}/report/{RUN_ID}.metrics.tsv",
+        f"{OUT}/report/{RUN_ID}.runinfo.json",
+        f"{OUT}/share/{RUN_ID}/MANIFEST.txt",
+
+
+rule resources_all:
+    """Fetch every manifest row, not just what this run needs; stratifications
+    only for references that have truth sets."""
+    input:
+        [f"{RES}/{dest}" for _, dest, _ in fetched(USABLE)],
+        expand(
+            RES + "/strat/{ref}/{ver}/{ref}@all",
+            zip,
+            ref=STRAT_ROWS["reference"],
+            ver=STRAT_ROWS["release"],
+        ),

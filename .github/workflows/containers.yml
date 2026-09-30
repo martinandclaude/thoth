@@ -1,0 +1,100 @@
+# Build every thoth container on GitHub, convert it to a SIF here -- where root
+# is available -- test it, and publish the finished SIF to GHCR via ORAS.
+# Pull requests build and test only; publishing happens on main.
+#
+# The SIF's sha256 IS its registry blob digest, so the digest printed in the job
+# summary is both the pin and the integrity check. Copy it and its built_from
+# commit into workflow/containers.tsv in a reviewed commit; nothing here edits
+# the repo. The images are not bit-reproducible (apt, timestamps), so that
+# commit, also stamped into each SIF as org.opencontainers.image.revision, is
+# what ties a digest to its recipe. GHCR creates packages private: make each one
+# public after its first publish, since fetch_containers.sh downloads anonymously.
+#
+# Actions are pinned by commit SHA and the apptainer package by sha256
+# (.github/actions/apptainer): a tag can move, these cannot.
+name: containers
+
+on:
+  push:
+    branches: [main]
+    paths: ["containers/**", ".github/workflows/containers.yml", ".github/actions/apptainer/**"]
+  pull_request:
+    paths: ["containers/**", ".github/workflows/containers.yml", ".github/actions/apptainer/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write        # push SIFs to ghcr.io/<owner>/thoth/*
+  id-token: write        # build provenance attestations
+  attestations: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [hts, truvari, happy]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/apptainer
+
+      # A recipe is a Dockerfile, or a SOURCE naming a pinned upstream image to
+      # convert as is. Both go through docker so that both carry the label.
+      - name: Build SIF
+        run: |
+          set -euo pipefail
+          d="containers/${{ matrix.image }}"
+          tag="thoth-${{ matrix.image }}:ci"
+          label="org.opencontainers.image.revision=$GITHUB_SHA"
+          if [ -f "$d/Dockerfile" ]; then
+            docker build --label "$label" -t "$tag" "$d"
+          else
+            src=$(grep -v '^#' "$d/SOURCE" | grep -m1 .)
+            echo "converting $src"
+            echo "FROM ${src#docker://}" | docker build --label "$label" -t "$tag" -
+          fi
+          apptainer build "${{ matrix.image }}.sif" "docker-daemon://$tag"
+          ls -lh "${{ matrix.image }}.sif"
+
+      # The smoke tests are the test_cmd cells of workflow/containers.tsv for
+      # every name this image serves: the checks fetch_containers.sh --test
+      # runs on a cluster.
+      - name: Test inside the SIF
+        run: |
+          set -euo pipefail
+          tests=$(awk -F'\t' -v img="${{ matrix.image }}" '
+            /^(#|$)/ { next }
+            !h { for (i = 1; i <= NF; i++) col[$i] = i; h = 1; next }
+            { n = split($col["image"], p, "/"); if (p[n] == img) print $col["test_cmd"] }
+          ' workflow/containers.tsv)
+          if [ -z "$tests" ]; then
+            echo "::error::no row in workflow/containers.tsv uses image ${{ matrix.image }}"
+            exit 1
+          fi
+          while IFS= read -r t; do
+            echo "+ $t"
+            apptainer exec "${{ matrix.image }}.sif" sh -c "$t" </dev/null
+          done <<< "$tests"
+
+      - name: Attest build provenance
+        if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ matrix.image }}.sif
+
+      - name: Push to GHCR (ORAS)
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          echo "${{ secrets.GITHUB_TOKEN }}" | apptainer registry login --username "${{ github.actor }}" --password-stdin oras://ghcr.io
+          apptainer push "${{ matrix.image }}.sif" "oras://ghcr.io/${{ github.repository }}/${{ matrix.image }}:$GITHUB_SHA"
+          digest="sha256:$(sha256sum "${{ matrix.image }}.sif" | cut -d' ' -f1)"
+          {
+            echo "### ${{ matrix.image }}"
+            echo ""
+            echo "| image | digest | built_from |"
+            echo "|---|---|---|"
+            echo "| ghcr.io/${{ github.repository }}/${{ matrix.image }} | \`$digest\` | \`$GITHUB_SHA\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

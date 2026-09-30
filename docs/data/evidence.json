@@ -1,0 +1,441 @@
+{
+ "sample": "HG002",
+ "technology": "Oxford Nanopore",
+ "truth_sets": [
+  {
+   "truth": "GIAB v4.2.1",
+   "caller": "DeepVariant",
+   "SNP": {
+    "recall": 0.99901,
+    "precision": 0.99913,
+    "truth_total": 3365127,
+    "tp": 3361801,
+    "fn": 3326,
+    "fp": 2938
+   },
+   "INDEL": {
+    "recall": 0.92511,
+    "precision": 0.95206,
+    "truth_total": 525469,
+    "tp": 486116,
+    "fn": 39353,
+    "fp": 25283
+   }
+  },
+  {
+   "truth": "GIAB v5.0q",
+   "caller": "DeepVariant",
+   "SNP": {
+    "recall": 0.99169,
+    "precision": 0.99633,
+    "truth_total": 3564988,
+    "tp": 3535379,
+    "fn": 29609,
+    "fp": 13012
+   },
+   "INDEL": {
+    "recall": 0.76381,
+    "precision": 0.90824,
+    "truth_total": 839367,
+    "tp": 641118,
+    "fn": 198249,
+    "fp": 68689
+   }
+  },
+  {
+   "truth": "GIAB CMRG v1.00",
+   "caller": "DeepVariant",
+   "SNP": {
+    "recall": 0.99205,
+    "precision": 0.99509,
+    "truth_total": 17603,
+    "tp": 17463,
+    "fn": 140,
+    "fp": 86
+   },
+   "INDEL": {
+    "recall": 0.83962,
+    "precision": 0.92498,
+    "truth_total": 3629,
+    "tp": 3047,
+    "fn": 582,
+    "fp": 261
+   }
+  }
+ ],
+ "strata": [
+  {
+   "stratum": "All benchmark regions",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.99901,
+    "precision": 0.99913,
+    "truth_total": 3365127,
+    "tp": 3361801,
+    "fn": 3326,
+    "fp": 2938
+   },
+   "INDEL": {
+    "recall": 0.92511,
+    "precision": 0.95206,
+    "truth_total": 525469,
+    "tp": 486116,
+    "fn": 39353,
+    "fp": 25283
+   }
+  },
+  {
+   "stratum": "Easy: outside every difficult region",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.9998,
+    "precision": 0.99998,
+    "truth_total": 2752090,
+    "tp": 2751548,
+    "fn": 542,
+    "fp": 61
+   },
+   "INDEL": {
+    "recall": 0.99908,
+    "precision": 0.99961,
+    "truth_total": 157824,
+    "tp": 157678,
+    "fn": 146,
+    "fp": 62
+   }
+  },
+  {
+   "stratum": "All difficult regions",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.99546,
+    "precision": 0.99532,
+    "truth_total": 613037,
+    "tp": 610253,
+    "fn": 2784,
+    "fp": 2877
+   },
+   "INDEL": {
+    "recall": 0.89337,
+    "precision": 0.93179,
+    "truth_total": 367850,
+    "tp": 328625,
+    "fn": 39225,
+    "fp": 25224
+   }
+  },
+  {
+   "stratum": "Tandem repeats and homopolymers",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.99674,
+    "precision": 0.99467,
+    "truth_total": 185698,
+    "tp": 185093,
+    "fn": 605,
+    "fp": 1002
+   },
+   "INDEL": {
+    "recall": 0.88485,
+    "precision": 0.92648,
+    "truth_total": 339122,
+    "tp": 300072,
+    "fn": 39050,
+    "fp": 25081
+   }
+  },
+  {
+   "stratum": "Segmental duplications",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.98342,
+    "precision": 0.98441,
+    "truth_total": 121100,
+    "tp": 119092,
+    "fn": 2008,
+    "fp": 1887
+   },
+   "INDEL": {
+    "recall": 0.98505,
+    "precision": 0.98344,
+    "truth_total": 10833,
+    "tp": 10671,
+    "fn": 162,
+    "fp": 183
+   }
+  },
+  {
+   "stratum": "Low mappability",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.98952,
+    "precision": 0.99192,
+    "truth_total": 192640,
+    "tp": 190622,
+    "fn": 2018,
+    "fp": 1554
+   },
+   "INDEL": {
+    "recall": 0.98502,
+    "precision": 0.98449,
+    "truth_total": 10412,
+    "tp": 10256,
+    "fn": 156,
+    "fp": 163
+   }
+  },
+  {
+   "stratum": "Extreme GC (<25 % or >65 %)",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.99887,
+    "precision": 0.99861,
+    "truth_total": 213568,
+    "tp": 213326,
+    "fn": 242,
+    "fp": 297
+   },
+   "INDEL": {
+    "recall": 0.95518,
+    "precision": 0.971,
+    "truth_total": 50510,
+    "tp": 48246,
+    "fn": 2264,
+    "fp": 1479
+   }
+  },
+  {
+   "stratum": "MHC",
+   "caller": "DeepVariant",
+   "truth": "GIAB v4.2.1",
+   "SNP": {
+    "recall": 0.98013,
+    "precision": 0.99884,
+    "truth_total": 20177,
+    "tp": 19776,
+    "fn": 401,
+    "fp": 23
+   },
+   "INDEL": {
+    "recall": 0.95051,
+    "precision": 0.98479,
+    "truth_total": 1677,
+    "tp": 1594,
+    "fn": 83,
+    "fp": 26
+   }
+  }
+ ],
+ "sv_bench": [
+  {
+   "caller": "cuteSV",
+   "truth": "GIAB CMRG v1.00",
+   "recall": 0.90741,
+   "precision": 0.92453,
+   "base": 216,
+   "tp": 196,
+   "fn": 20,
+   "fp": 16
+  },
+  {
+   "caller": "cuteSV",
+   "truth": "GIAB v5.0q",
+   "recall": 0.81727,
+   "precision": 0.9295,
+   "base": 28123,
+   "tp": 22984,
+   "fn": 5139,
+   "fp": 1546
+  },
+  {
+   "caller": "Sniffles",
+   "truth": "GIAB CMRG v1.00",
+   "recall": 0.90741,
+   "precision": 0.93333,
+   "base": 216,
+   "tp": 196,
+   "fn": 20,
+   "fp": 14
+  },
+  {
+   "caller": "Sniffles",
+   "truth": "GIAB v5.0q",
+   "recall": 0.78466,
+   "precision": 0.92666,
+   "base": 28123,
+   "tp": 22067,
+   "fn": 6056,
+   "fp": 1575
+  }
+ ],
+ "sv_refine_bench": [
+  {
+   "caller": "cuteSV",
+   "truth": "GIAB CMRG v1.00",
+   "recall": 0.90741,
+   "precision": 0.92453,
+   "base": 216,
+   "tp": 196,
+   "fn": 20,
+   "fp": 16
+  },
+  {
+   "caller": "cuteSV",
+   "truth": "GIAB v5.0q",
+   "recall": 0.81727,
+   "precision": 0.9295,
+   "base": 28123,
+   "tp": 22984,
+   "fn": 5139,
+   "fp": 1546
+  },
+  {
+   "caller": "Sniffles",
+   "truth": "GIAB CMRG v1.00",
+   "recall": 0.90741,
+   "precision": 0.93333,
+   "base": 216,
+   "tp": 196,
+   "fn": 20,
+   "fp": 14
+  },
+  {
+   "caller": "Sniffles",
+   "truth": "GIAB v5.0q",
+   "recall": 0.78466,
+   "precision": 0.92666,
+   "base": 28123,
+   "tp": 22067,
+   "fn": 6056,
+   "fp": 1575
+  }
+ ],
+ "sv_refine": [
+  {
+   "caller": "cuteSV",
+   "truth": "GIAB v5.0q",
+   "recall": 0.85691,
+   "precision": 0.94838,
+   "base": 28123,
+   "tp": 24099,
+   "fn": 4024,
+   "fp": 1132
+  },
+  {
+   "caller": "Sniffles",
+   "truth": "GIAB v5.0q",
+   "recall": 0.84792,
+   "precision": 0.95395,
+   "base": 28123,
+   "tp": 23846,
+   "fn": 4277,
+   "fp": 989
+  }
+ ],
+ "seqsim_baseline": {
+  "method": "truvari.comparisons.seqsim on pairs of unrelated uniform-random sequences, 200 pairs per length, truvari 5.4.0 (docs/seqsim_baseline.py)",
+  "threshold": 0.7,
+  "rows": [
+   {
+    "length": 50,
+    "pairs": 200,
+    "min": 0.67,
+    "p05": 0.68,
+    "median": 0.71,
+    "p95": 0.75,
+    "max": 0.79,
+    "share_at_or_above_0_7": 0.795
+   },
+   {
+    "length": 100,
+    "pairs": 200,
+    "min": 0.68,
+    "p05": 0.7,
+    "median": 0.72,
+    "p95": 0.745,
+    "max": 0.76,
+    "share_at_or_above_0_7": 0.955
+   },
+   {
+    "length": 200,
+    "pairs": 200,
+    "min": 0.7025,
+    "p05": 0.7125,
+    "median": 0.73,
+    "p95": 0.745,
+    "max": 0.7525,
+    "share_at_or_above_0_7": 1.0
+   },
+   {
+    "length": 300,
+    "pairs": 200,
+    "min": 0.715,
+    "p05": 0.72,
+    "median": 0.7317,
+    "p95": 0.7417,
+    "max": 0.75,
+    "share_at_or_above_0_7": 1.0
+   },
+   {
+    "length": 500,
+    "pairs": 200,
+    "min": 0.72,
+    "p05": 0.727,
+    "median": 0.734,
+    "p95": 0.742,
+    "max": 0.747,
+    "share_at_or_above_0_7": 1.0
+   },
+   {
+    "length": 1000,
+    "pairs": 200,
+    "min": 0.727,
+    "p05": 0.7315,
+    "median": 0.7365,
+    "p95": 0.7425,
+    "max": 0.744,
+    "share_at_or_above_0_7": 1.0
+   },
+   {
+    "length": 2000,
+    "pairs": 200,
+    "min": 0.7335,
+    "p05": 0.7352,
+    "median": 0.7385,
+    "p95": 0.7422,
+    "max": 0.7452,
+    "share_at_or_above_0_7": 1.0
+   },
+   {
+    "length": 5000,
+    "pairs": 200,
+    "min": 0.7374,
+    "p05": 0.7383,
+    "median": 0.7401,
+    "p95": 0.7418,
+    "max": 0.7435,
+    "share_at_or_above_0_7": 1.0
+   }
+  ]
+ },
+ "provenance": [
+  {
+   "metrics_sha256": "09c096469f576b3ff7e573d0938d7ed320b77c745874ef3e6bfbbf6f3b41e593",
+   "config_sha256": "ea1fb3832e5254f98ad06411fc12d24eb350415bc4047652ac7f7e3fa86544a3",
+   "containers": {
+    "happy": "b3a7b1f97eccf1f0cd1ab19eb12ebf8a3ab298dd2ad8010017987f46da345a48",
+    "rtg": "13580828b8f825023592ddc0eb5cf6db1a4c8aeaa3893ff0b8a0446205952fc8",
+    "bcftools": "72b84cccdaf50c705530aa532dcb7f1cabc4b803da5a00bc48d153c65f27f889",
+    "samtools": "aa363d3687cdb1a6d95c9dd9534d9f9a7b6f172f888c48799e22e8d185e37282",
+    "truvari": "0e2e6458c4764243a40500cc4da07c27827282fcf8b2704a96a7d7d1031bb501"
+   }
+  }
+ ]
+}

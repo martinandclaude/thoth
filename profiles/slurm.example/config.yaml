@@ -1,0 +1,66 @@
+# SLURM profile TEMPLATE for thoth.
+#
+#   cp -r profiles/slurm.example profiles/slurm      # gitignored
+#   # set slurm_account, slurm_partition and apptainer-args below, then:
+#   snakemake --profile profiles/slurm --configfile runs/<run>.yaml
+#
+# A wrong partition PENDS forever rather than failing -- check `sinfo` once.
+
+executor: slurm
+
+# MUST be a list -- the option is nargs="+" and a bare scalar is rejected.
+software-deployment-method:
+  - apptainer
+
+# No apptainer-prefix: container_for() returns local SIF paths; nothing is pulled.
+
+# Snakemake binds only the working directory (plus --home) into a container.
+# Query VCFs, references and the resources dir usually live elsewhere on the
+# shared filesystem: bind its mount point here or no rule sees its inputs.
+# A LITERAL path -- profile scalars get expandvars on the submitting host.
+apptainer-args: "--bind /CHANGE_ME/shared/filesystem"
+
+jobs: 32
+max-jobs-per-second: 1
+max-status-checks-per-second: 5
+
+# The plugin's first status check defaults to 40 s, backing off to 180 s. Most
+# of thoth's jobs are short (prep_query, check_contigs, tidy_metrics), so the
+# default turns a two-minute job into a five-minute round trip.
+slurm-init-seconds-before-status-checks: 10
+
+printshellcmds: true
+rerun-incomplete: true
+keep-going: true
+benchmark-extended: true
+
+# First-run failures (a 404 in the manifest, a contig mismatch, a PENDING
+# container) are deterministic: a retry repeats them at three times the wall clock.
+restart-times: 0
+
+default-resources:
+  # If you belong to more than one SLURM account, set this explicitly: otherwise
+  # the work is charged to your default account and nothing surfaces it until
+  # an audit.
+  slurm_account: "CHANGE_ME"
+  slurm_partition: "CHANGE_ME"
+  runtime: 120          # minutes
+  mem_mb: 4000
+  tmpdir: "/tmp"
+  # No cpus_per_task: the executor lets it replace a rule's threads
+  # (get_cpu_setting), so a default here gives every job one CPU.
+
+# NO `gres` OR `tasks` KEY HERE, EVER. Both fail silently: the executor makes a
+# rule a GPU job by a substring test on resources["gres"], so a default makes
+# every rule one, and `tasks` on such a rule becomes --ntasks-per-gpu.
+
+# No mem_mb or runtime in set-resources: the rules that need more than the
+# defaults declare their own (hap.py's comes from small_variants.happy_mem_mb in
+# config/config.yaml), and set-resources would override them. The one site
+# choice that belongs here: with `fetch_on_login_node: false` in
+# config/site.yaml, send the fetch rules to a partition with outbound HTTPS.
+# set-resources:
+#   fetch_resource:
+#     slurm_partition: "CHANGE_ME"
+#   fetch_index:
+#     slurm_partition: "CHANGE_ME"

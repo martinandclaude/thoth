@@ -1,0 +1,100 @@
+# thoth -- global defaults, identical on every site.
+#
+# Site-specific values live in config/site.yaml, which is NOT committed: copy
+# config/site.example.yaml and fill it in (resources_dir, references,
+# containers_dir, fetch_on_login_node). The Snakefile loads both itself, so a
+# run needs only:
+#
+#   snakemake --profile profiles/slurm --configfile runs/<run>.yaml
+#
+# This file must not carry the site keys, even empty. Snakemake applies
+# command-line --configfile files AFTER the ones the Snakefile loads, so an empty
+# `resources_dir:` here, passed on the command line, would silently overwrite
+# the site value. Unknown keys anywhere below fail at parse time.
+
+results_dir: results                # relative to the repository root, or absolute
+manifest: resources/manifest.tsv    # truth sets and stratifications: URL and sha256
+
+# The benchmark matrix. Every query is run against every entry here for which
+# the manifest has a matching (sample, reference, release) row; non-matching
+# combinations are skipped with a note at parse time. Per entry:
+#   truth         a `release` in the manifest
+#   strat         the `release` of the manifest's strat_tar row to stratify by
+#   strat_subset  <ref>-<subset>-stratifications.tsv in the tarball; v3.6 ships
+#                 all and all-bb (default all)
+#   truvari       overrides of structural_variants.truvari for this truth set
+benchmarks:
+  - truth: v4.2.1
+    strat: v3.6
+    strat_subset: all
+  - truth: v5.0q
+    strat: v3.6
+    strat_subset: all
+    # SV comparison as GIAB's v5.0q README recommends. Unlike earlier benchmarks
+    # v5.0q does not exclude complex SVs, so the same event can be written
+    # several valid ways; --refine re-aligns candidate regions to compare
+    # haplotypes rather than records.
+    truvari:
+      refine: true
+      pick: ac
+      refdist: 2000
+      chunksize: 5000
+  - truth: CMRG_v1.00
+    strat: v3.6
+    # CMRG restricts the regions through its own confident BED, which is
+    # orthogonal to the stratification set the counts are broken down by, and
+    # v3.6 ships no CMRG-specific TSV.
+    strat_subset: all
+
+# Small variants (SNVs and indels) are scored by hap.py for every caller under a
+# query's `vcf_small`; structural variants by truvari for every caller under
+# `vcf_sv`. A class runs when a query supplies VCFs for it.
+small_variants:
+  engine: vcfeval           # hap.py comparison engine; 'xcmp' for the fallback
+  pass_only: true
+  regions: autosomes        # autosomes | all | comma-separated contig list
+  default_score_field: GQ   # hap.py --roc field; a query's `score_field` overrides it
+  happy_extra: ""           # extra hap.py flags, passed verbatim
+  # Memory for each hap.py job, in MB. Sized by hap.py's final QUANTIFY step, not
+  # by vcfeval: quantify holds every stratification interval in memory at once,
+  # and the v3.6 "all" set is 191 files and 224 M intervals. 32000 was
+  # OOM-killed (HG007 x v4.2.1), so the need is only known to exceed 32 GB.
+  # 128000 is headroom, not a measurement: read MaxRSS from sacct after a run
+  # and set this to that plus a margin.
+  happy_mem_mb: 128000
+
+structural_variants:
+  # truvari bench flags by their long name (see bench_sv.smk for the list).
+  truvari:
+    refdist: 500
+    pctseq: 0.7
+    pctsize: 0.7
+    pctovl: 0.0
+    sizemin: 50
+    sizemax: 50000
+    # truvari 5.4.0 resolves symbolic <DEL>/<INV>/<DUP> against the reference
+    # itself, but two defaults leave that half-done for this benchmark:
+    #
+    # dup-to-ins: GIAB v5.0q stvar has NO symbolic and NO DUP records; every SV
+    # is a sequence-resolved INS or DEL. Without this a caller's <DUP> can never
+    # match: DUP != INS fails the type check (variant_record.py:787), scoring
+    # the call FP and the true insertion FN.
+    dup-to-ins: true
+    # max-resolve: default 25000, below sizemax, so symbolic SVs of 25-50 kb
+    # would be compared with the sequence check silently skipped. Match sizemax.
+    max-resolve: 50000
+    # Raw truvari bench flags, verbatim; a benchmark's own truvari.extra is appended.
+    extra: "--passonly"
+
+# The provenance record, results/report/<run_id>.runinfo.json.
+runinfo:
+  # sha256 every query VCF. Minutes of wall clock on WGS-sized files, so off by
+  # default; turn it on where the record is the point: a release, a submission,
+  # an audit. The reference .fai and every truth and stratification file used
+  # are always checksummed.
+  hash_query_vcfs: false
+
+# Set by the run file (see runs/run.example.yaml): run_id names the report and
+# share directory; queries are the VCFs to score.
+run_id: "unnamed-run"
+queries: []

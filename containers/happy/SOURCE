@@ -1,0 +1,11 @@
+# hap.py is not built from source. CI converts this exact image to a SIF;
+# tests/run.sh checks it end to end on the planted fixtures.
+# jmcdani20/hap.py is a community rebuild with vcfeval compiled in; upstream
+# hap.py has had no release since 2021 and publishes no image. A from-source
+# build is planned and will be checked against this one on the test fixtures.
+# Its own __version__ is empty: identify it by digest, never by self-report.
+# The bundled rtg reports RTG Tools 3.10.1, Core Version unknown (2020-05-04);
+# it also builds the reference SDF (rule rtg_format).
+# The bioconda hap.py is not a substitute: it touches an empty build/bin/rtg
+# and never enables vcfeval.
+docker://jmcdani20/hap.py@sha256:0812d37e7210011e407914deb3da2094ec8258077b21d3211e694e5ca303b489

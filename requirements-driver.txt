@@ -1,0 +1,13 @@
+# The environment that RUNS thoth: Snakemake and the Python script rules. Not
+# inert: tidy_metrics.py writes metrics.tsv with pandas, and
+# absolutize_strat_tsv.py decides which strata are scored. So the whole closure
+# is pinned, with hashes, in requirements-driver.lock (Python 3.12, as in CI):
+#
+#   python3.12 -m venv .venv && . .venv/bin/activate
+#   pip install --require-hashes -r requirements-driver.lock
+#
+# Edit this file, then regenerate the lock with the command at its top.
+snakemake==9.23.1
+snakemake-executor-plugin-slurm==2.8.0
+pandas==3.0.6
+pyyaml==6.0.3

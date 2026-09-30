@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>thoth — weigh your pipeline against the truth</title>
+<meta name="description" content="thoth weighs variant-calling pipelines against GIAB truth sets (v4.2.1, v5.0q and CMRG) using hap.py and truvari, with real results showing how much the verdict depends on how the benchmark is run.">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icon-32.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta property="og:title" content="thoth — weigh your pipeline against the truth">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://martinandclaude.github.io/thoth/">
+<meta property="og:description" content="thoth weighs variant-calling pipelines against GIAB truth sets (v4.2.1, v5.0q and CMRG) using hap.py and truvari, with real results showing how much the verdict depends on how the benchmark is run.">
+<meta property="og:image" content="https://martinandclaude.github.io/thoth/assets/thoth.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+/* ---------------------------------------------------------------- tokens
+   Chart series slots 1-2 are the validated reference palette, re-validated
+   against these exact surfaces (light #fbf9f3, dark #15171c): all checks pass. */
+:root {
+  color-scheme: light;
+  --page: #f5f2e9;
+  --surface: #fbf9f3;
+  --ink: #16140f;
+  --ink-2: #4f4b41;
+  --muted: #6b665a;
+  --grid: #e4dfd1;
+  --axis: #c8c1ad;
+  --ring: #fbf9f3;
+  --border: rgba(22, 20, 15, 0.10);
+  --navy: #1b2a6b;
+  --gold: #c9951f;
+  --kicker: #86620f;
+  --gold-soft: #f3e3b3;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --band: rgba(42, 120, 214, 0.12);
+  --code-bg: #efeadc;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0f1115; --surface: #15171c; --ink: #f4f2ec; --ink-2: #c3c0b5;
+    --muted: #8d897d; --grid: #262931; --axis: #3a3d45; --ring: #15171c;
+    --border: rgba(255, 255, 255, 0.10); --navy: #9fb2ff; --gold: #e3b94a; --kicker: #e3b94a;
+    --gold-soft: #3a3120; --series-1: #3987e5; --series-2: #d95926;
+    --band: rgba(57, 135, 229, 0.16); --code-bg: #1d2027;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0f1115; --surface: #15171c; --ink: #f4f2ec; --ink-2: #c3c0b5;
+  --muted: #8d897d; --grid: #262931; --axis: #3a3d45; --ring: #15171c;
+  --border: rgba(255, 255, 255, 0.10); --navy: #9fb2ff; --gold: #e3b94a; --kicker: #e3b94a;
+  --gold-soft: #3a3120; --series-1: #3987e5; --series-2: #d95926;
+  --band: rgba(57, 135, 229, 0.16); --code-bg: #1d2027;
+}
+
+/* ---------------------------------------------------------------- layout */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--navy); text-underline-offset: 2px; }
+code { font: 0.9em ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+
+header.hero { text-align: center; padding: 28px 0 8px; }
+header.hero img { width: min(640px, 100%); height: auto; display: block; margin: 0 auto; }
+header.hero h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.2; margin: 8px 0 10px; letter-spacing: -0.01em; }
+header.hero p.lede { font-size: 1.15rem; color: var(--ink); max-width: 40em; margin: 0 auto; }
+header.hero p.myth { font-size: 0.95rem; color: var(--ink-2); font-style: italic; max-width: 40em; margin: 12px auto 0; }
+.actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 22px 0 6px; }
+.btn { display: inline-block; padding: 9px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid var(--border); color: var(--ink); background: var(--surface); }
+.btn.primary { background: var(--navy); color: #fff; border-color: transparent; }
+:root[data-theme="dark"] .btn.primary { color: #0f1115; }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .btn.primary { color: #0f1115; } }
+
+.theme-toggle { position: fixed; top: 12px; right: 12px; z-index: 5; font: inherit; font-size: 0.85rem; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+
+.provenance { text-align: center; color: var(--muted); font-size: 0.9rem; margin: 6px 0 36px; }
+
+section.claim { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px 26px 20px; margin: 0 0 26px; }
+section.claim .kicker { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--kicker); font-weight: 700; margin: 0; }
+section.claim h2 { font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.25; margin: 4px 0 8px; }
+section.claim > p { color: var(--ink-2); margin: 0 0 14px; max-width: 46em; }
+.takeaway:empty { display: none; }
+.takeaway { border-left: 3px solid var(--gold); padding: 6px 0 6px 14px; margin: 16px 0 4px; color: var(--ink); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 10px 0 4px; }
+.tile { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--page); }
+.tile .label { font-size: 0.85rem; color: var(--ink-2); }
+.tile .value { font-size: 1.9rem; font-weight: 650; line-height: 1.2; }
+.tile .note { font-size: 0.8rem; color: var(--muted); }
+
+/* ---------------------------------------------------------------- charts */
+figure.chart { margin: 8px 0 0; }
+pre.cmd { margin: -4px 0 14px; overflow-x: auto; }
+pre.cmd code { display: inline-block; padding: 6px 10px; }
+.chart-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.88rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.table-toggle { font: inherit; font-size: 0.82rem; color: var(--ink-2); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.facets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.facet-title { font-size: 0.9rem; font-weight: 650; margin: 6px 0 0; }
+svg.plot { width: 100%; height: auto; display: block; overflow: visible; }
+svg.plot text { fill: var(--ink-2); font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
+svg.plot .tick text { fill: var(--muted); font-variant-numeric: tabular-nums; }
+svg.plot .grid line { stroke: var(--grid); stroke-width: 1; }
+svg.plot .base { stroke: var(--axis); stroke-width: 1; }
+svg.plot .hit { fill: transparent; cursor: default; }
+svg.plot .hit:focus { outline: none; }
+svg.plot .hit:focus-visible { stroke: var(--navy); stroke-width: 2; }
+svg.plot g.mark:focus-within circle.dot, svg.plot g.mark:hover circle.dot { stroke-width: 3; }
+circle.dot { stroke: var(--ring); stroke-width: 2; }
+figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+.table-scroll { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 8px; }
+table.data th, table.data td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--grid); }
+table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tooltip { position: fixed; pointer-events: none; z-index: 10; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.84rem; box-shadow: 0 6px 20px rgba(0,0,0,0.12); max-width: 280px; display: none; }
+.tooltip .v { font-weight: 700; font-size: 1rem; }
+.tooltip .k { color: var(--ink-2); }
+.tooltip .row { display: flex; align-items: center; gap: 6px; }
+.tooltip .key { width: 12px; height: 2px; display: inline-block; }
+.pending { border: 1px dashed var(--axis); border-radius: 10px; padding: 12px 14px; color: var(--ink-2); font-size: 0.92rem; margin-top: 10px; }
+
+table.settings { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+table.settings th, table.settings td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--grid); }
+table.settings th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+table.settings td:first-child { white-space: nowrap; font-weight: 600; }
+
+footer { color: var(--muted); font-size: 0.88rem; text-align: center; padding: 20px 0 40px; }
+footer p { margin: 0 0 4px; }
+#run-record { margin-bottom: 16px; }
+#run-record td:last-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8rem; word-break: break-all; }
+@media (max-width: 560px) {
+  section.claim { padding: 18px 16px 14px; }
+  table.settings td:first-child { white-space: normal; }
+  .theme-toggle { position: absolute; }      /* scrolls away with the header instead of covering text */
+}
+svg.plot text.rowlabel { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light or dark theme">Theme</button>
+<div class="wrap">
+
+<header class="hero">
+  <img src="assets/thoth.png" alt="thoth: an ibis-headed scribe writing checkmarks on a scroll beside a DNA helix" width="1200" height="675">
+  <h1>Weigh your pipeline against the truth.</h1>
+  <p class="lede">thoth weighs every pipeline the same way, every time. Hold yours against GIAB's truth sets — v4.2.1, v5.0q and CMRG — and let the scales decide: devoured by Ammit, or admitted to the Field of Reeds we call prod.</p>
+  <p class="myth">In the old judgement, Anubis weighed the heart against the feather of Ma'at while Thoth wrote down the verdict. Here the feather is GIAB and Anubis's scales are hap.py and truvari — and, as the results below show, the verdict depends on how carefully those scales are set.</p>
+  <div class="actions">
+    <a class="btn primary" href="https://github.com/martinandclaude/thoth#quick-start">Get thoth and run it</a>
+    <a class="btn" href="#settings">What thoth sets, and why</a>
+  </div>
+</header>
+<p class="provenance" id="provenance">Loading results…</p>
+
+<!-- ---------------------------------------------------------------- 1 -->
+<section class="claim" id="truth-sets">
+  <p class="kicker">Choice 1 · the truth set</p>
+  <h2>The same calls get a different score from each truth set</h2>
+  <p>One DeepVariant callset, scored three times — against GIAB v4.2.1, the newer T2T-based v5.0q, and the CMRG set of 273 medically relevant genes. SNPs barely move. Indels do not: v5.0q reaches into repeats and complex regions that v4.2.1 excluded, so it finds misses that the older benchmark could not see.</p>
+  <figure class="chart" data-chart="truth">
+    <div class="chart-head">
+      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall</span><span><i style="background:var(--series-2)"></i>Precision</span></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets"></div>
+    <figcaption>PASS calls on chr1-22, inside each truth set's benchmark regions. Axes start where the data does, not at 0 — they are dot plots, not bars.</figcaption>
+  </figure>
+  <p class="takeaway" id="truth-takeaway"></p>
+</section>
+
+<!-- ---------------------------------------------------------------- 2 -->
+<section class="claim" id="strata">
+  <p class="kicker">Choice 2 · reporting one number or many</p>
+  <h2>A headline recall hides where a caller actually fails</h2>
+  <p>The same calls against v4.2.1, broken down by GIAB's genome stratifications. The overall figure is dominated by easy sequence; the difficult parts of the genome — repeats, segmental duplications, low mappability, the MHC — are where callers differ and where clinically relevant variants hide.</p>
+  <figure class="chart" data-chart="strata">
+    <div class="chart-head">
+      <div class="legend"><span><i style="background:var(--series-1)"></i>Recall in the stratum</span><span><i style="background:var(--muted);border-radius:0;width:12px;height:2px"></i>Overall recall</span></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets"></div>
+    <figcaption>PASS calls on chr1-22 against GIAB v4.2.1. Each query is stratified only by its own sample's genome-specific regions — another genome's difficult regions say nothing about this one's calls.</figcaption>
+  </figure>
+  <p class="takeaway" id="strata-takeaway"></p>
+</section>
+
+<!-- ---------------------------------------------------------------- 3 -->
+<section class="claim" id="refine">
+  <p class="kicker">Choice 3 · comparing records or haplotypes</p>
+  <h2>Structural variants: the same event can be written more than one way</h2>
+  <p>GIAB v5.0q, unlike earlier benchmarks, keeps complex SVs — and a complex event has several valid representations. A caller that writes it differently from the truth is scored as a miss plus a false call, unless the comparison re-aligns the region and compares haplotypes instead of records. GIAB's own README for v5.0q recommends exactly that:</p>
+  <pre class="cmd"><code>truvari bench --refine --pick ac -r 2000 -C 5000</code></pre>
+  <figure class="chart" data-chart="sv">
+    <div class="chart-head">
+      <div class="legend" id="sv-legend"></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets"></div>
+    <figcaption>SV recall for HG002, PASS calls, truvari 5.4.0 with <code>--dup-to-ins</code> and <code>--max-resolve 50000</code>. All chromosomes in the truth BED.</figcaption>
+  </figure>
+  <div class="pending" id="sv-pending" hidden></div>
+  <p class="takeaway" id="sv-takeaway"></p>
+</section>
+
+<!-- ---------------------------------------------------------------- 4 -->
+<section class="claim" id="seqsim">
+  <p class="kicker">Choice 4 · reading a threshold</p>
+  <h2>A 70 % sequence-similarity threshold passes unrelated sequence</h2>
+  <p>truvari's default <code>pctseq 0.7</code> sounds strict. But its similarity is <code>(len_a + len_b − edit distance) / (len_a + len_b)</code>, and under that measure two <em>completely unrelated</em> random sequences of the same length score 71–74 % (median, 50 bp to 5 kb). From 200 bp, every such pair passes. An insertion of the right size at the right place is matched whatever its sequence — so SV insertion precision is really a size-and-position precision.</p>
+  <figure class="chart" data-chart="seqsim">
+    <div class="chart-head">
+      <div class="legend"><span><i style="background:var(--series-1)"></i>Median, unrelated pairs</span><span><i style="background:var(--band);border-radius:2px;width:14px"></i>5th–95th percentile</span></div>
+      <button class="table-toggle" type="button">Show table</button>
+    </div>
+    <div class="facets"></div>
+    <figcaption id="seqsim-caption"></figcaption>
+  </figure>
+</section>
+
+<!-- ---------------------------------------------------------------- 5 -->
+<section class="claim" id="settings">
+  <p class="kicker">What thoth sets, and why</p>
+  <h2>Defaults thoth changes, each for a measured reason</h2>
+  <p>Each row is covered by a planted-truth test that runs on every change to thoth: a small synthetic genome where the right answer is known exactly, so any drift in behaviour fails the build.</p>
+  <table class="settings">
+    <thead><tr><th>Setting</th><th>Left at the default</th><th>What thoth does</th></tr></thead>
+    <tbody>
+      <tr><td>truvari <code>--refine</code> for v5.0q</td><td>A 300 bp deletion written as two adjacent 150 bp deletions scores 0 % recall.</td><td>Re-aligns the region and compares haplotypes: 100 %. Both results are kept, so the gap is visible.</td></tr>
+      <tr><td>truvari <code>--dup-to-ins</code></td><td>GIAB's truth has no DUP records, so a caller's <code>&lt;DUP&gt;</code> can never match: one false positive and one false negative per duplication.</td><td>Treats DUP as the insertion it is, sequence-resolved against the reference: matched at 100 % similarity.</td></tr>
+      <tr><td>truvari <code>--max-resolve 50000</code></td><td>Symbolic SVs above 25 kb are not resolved, so their sequence check is silently skipped.</td><td>Resolves up to the same 50 kb that bounds the comparison, so every SV in scope is compared on sequence.</td></tr>
+      <tr><td>Drop <code>ALT=*</code> from SV truth</td><td>Spanning-deletion placeholders in v5.0q are often miscategorised by truvari bench, as GIAB's README warns.</td><td>Removed from every SV truth VCF before comparison.</td></tr>
+      <tr><td>Own-sample stratification</td><td>Every query reports all seven GIAB genomes' genome-specific strata — rows that describe someone else's genome.</td><td>Keeps only the query sample's own; that also removed 27 % of the 224 million intervals hap.py holds in memory.</td></tr>
+      <tr><td>Keep half-calls</td><td>The common filter <code>-e 'GT="ref" || GT="mis"'</code> drops <code>./1</code> calls whose ALT is asserted present, inflating false negatives on joint callsets. bcftools treats any genotype with a missing allele as missing, so <code>-i 'GT="alt"'</code> drops them too.</td><td>Filters with <code>-i 'GT~"[1-9]"'</code>, which keeps any call carrying an ALT allele, half-calls included.</td></tr>
+      <tr><td>SV truth for HG002 only</td><td>SV calls for other samples look scoreable but have no truth set; any number would be invented.</td><td>Skips them with a note. GIAB publishes SV benchmarks for HG002 alone.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ---------------------------------------------------------------- 6 -->
+<section class="claim" id="reproducible">
+  <p class="kicker">Reproducible by construction</p>
+  <h2>Every number can be traced to the exact bytes that produced it</h2>
+  <p>Each variant tool thoth runs is published by this repository's own CI as a single container image file: bcftools, samtools and truvari built from pinned sources, hap.py converted unchanged from a community image pinned by digest. Each file is tested, given a signed build-provenance attestation, and published by content digest. A cluster only downloads and verifies those files; it never builds or converts anything. Each run writes a provenance record with the commit, the merged configuration, every image digest and the checksum of every truth file used.</p>
+  <div id="run-record" hidden></div>
+  <div class="actions" style="justify-content:flex-start">
+    <a class="btn primary" href="https://github.com/martinandclaude/thoth#quick-start">Quick start</a>
+    <a class="btn" href="https://github.com/martinandclaude/thoth/actions">Build and test history</a>
+  </div>
+</section>
+
+<footer>
+  <p>thoth · <a href="https://github.com/martinandclaude/thoth">github.com/martinandclaude/thoth</a> · results: GIAB HG002, Oxford Nanopore</p>
+  <p>Code under the <a href="https://github.com/martinandclaude/thoth/blob/main/LICENSE">MIT licence</a>. Logo generated with ChatGPT (OpenAI).</p>
+</footer>
+</div>
+<div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------- theme
+(function () {
+  const root = document.documentElement, btn = document.getElementById("theme-toggle");
+  let saved = null;
+  try { saved = localStorage.getItem("thoth-theme"); } catch (e) { /* storage unavailable */ }
+  if (saved === "light" || saved === "dark") root.dataset.theme = saved;
+  const current = () => root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const label = () => { btn.textContent = current() === "dark" ? "Light theme" : "Dark theme"; };
+  label();
+  btn.addEventListener("click", () => {
+    root.dataset.theme = current() === "dark" ? "light" : "dark";
+    try { localStorage.setItem("thoth-theme", root.dataset.theme); } catch (e) { /* ignore */ }
+    label();
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", label);
+})();
+
+// ---------------------------------------------------------------- helpers
+const NS = "http://www.w3.org/2000/svg";
+const pct = (v, d = 1) => (100 * v).toFixed(d) + " %";
+const int = (v) => v.toLocaleString("en-US");
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function text(parent, x, y, str, attrs = {}) {
+  const t = el("text", { x, y, ...attrs }, parent); t.textContent = str; return t;
+}
+const tip = document.getElementById("tooltip");
+function showTip(evt, rows) {
+  tip.replaceChildren();
+  for (const r of rows) {
+    const row = document.createElement("div"); row.className = "row";
+    if (r.color) { const k = document.createElement("span"); k.className = "key"; k.style.background = r.color; row.appendChild(k); }
+    if (r.value !== undefined) { const v = document.createElement("span"); v.className = "v"; v.textContent = r.value; row.appendChild(v); }
+    const l = document.createElement("span"); l.className = "k"; l.textContent = r.label; row.appendChild(l);
+    tip.appendChild(row);
+  }
+  tip.style.display = "block";
+  let x, y;
+  if (evt.type === "focus") { const b = evt.target.getBoundingClientRect(); x = b.right; y = b.top; }
+  else { x = evt.clientX; y = evt.clientY; }
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 8, x + 14) + "px";
+  tip.style.top = Math.max(8, y - h - 12) + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+function bindTip(node, rowsFn) {
+  node.setAttribute("tabindex", "0");
+  node.addEventListener("pointermove", (e) => showTip(e, rowsFn()));
+  node.addEventListener("pointerleave", hideTip);
+  node.addEventListener("focus", (e) => showTip(e, rowsFn()));
+  node.addEventListener("blur", hideTip);
+}
+function cssVar(name) { return `var(${name})`; }
+// evidence.json entries by label (extract_evidence.py sets them), failing loudly on a miss.
+function pick(list, field, value) {
+  const hit = list.find((x) => x[field] === value);
+  if (!hit) throw new Error(`evidence.json has no ${field} "${value}"`);
+  return hit;
+}
+function pctRange(vals) {
+  const lo = pct(Math.min(...vals), 0), hi = pct(Math.max(...vals), 0);
+  return lo === hi ? lo : `${lo.replace(" %", "")}–${hi}`;
+}
+
+// Horizontal dot plot: rows of labels, one x scale, 1-2 dots per row.
+function dotPlot(container, { title, rows, domain, series, overall, width = 440, labelW = 150, ticks }) {
+  if (title) { const t = document.createElement("p"); t.className = "facet-title"; t.textContent = title; container.appendChild(t); }
+  // Draw at the container's real width (capped at the design width) so text
+  // stays at its specified size instead of being scaled down on a phone. On a
+  // narrow container each row's label moves above its dots.
+  width = Math.min(width, Math.max(280, container.clientWidth || width));
+  const stacked = width < 420;
+  const rowH = stacked ? 44 : 30, top = 8, axisH = 24, h = top + rows.length * rowH + axisH;
+  const svg = el("svg", { class: "plot", viewBox: `0 0 ${width} ${h}`, role: "img" }, container);
+  svg.style.maxWidth = width + "px";
+  svg.setAttribute("aria-label", (title ? title + ": " : "") + rows.map((r) => r.label).join(", "));
+  const x0 = stacked ? 10 : labelW, x1 = width - 14;
+  const sx = (v) => x0 + ((v - domain[0]) / (domain[1] - domain[0])) * (x1 - x0);
+  const dotY = (i) => top + i * rowH + (stacked ? 30 : rowH / 2);
+  const g = el("g", { class: "grid" }, svg);
+  for (const t of ticks) {
+    el("line", { x1: sx(t), x2: sx(t), y1: top - 4, y2: top + rows.length * rowH }, g);
+    const tk = el("g", { class: "tick" }, svg);
+    text(tk, sx(t), top + rows.length * rowH + 16, (100 * t).toFixed(t * 100 % 1 ? 1 : 0) + "%", { "text-anchor": "middle" });
+  }
+  if (overall !== undefined) {
+    el("line", { x1: sx(overall), x2: sx(overall), y1: top - 4, y2: top + rows.length * rowH, stroke: cssVar("--muted"), "stroke-width": 2 }, svg);
+  }
+  rows.forEach((r, i) => {
+    const cy = dotY(i);
+    text(svg, stacked ? x0 : 0, stacked ? cy - 13 : cy + 4, r.label, { class: "rowlabel", ...(r.strong ? { "font-weight": 650 } : {}) });
+    const vals = series.map((s) => r[s.key]).filter((v) => v !== undefined);
+    if (vals.length > 1) el("line", { x1: sx(Math.min(...vals)), x2: sx(Math.max(...vals)), y1: cy, y2: cy, stroke: cssVar("--axis"), "stroke-width": 2 }, svg);
+    const mark = el("g", { class: "mark" }, svg);
+    series.forEach((s) => {
+      const v = r[s.key]; if (v === undefined) return;
+      const cx = Math.max(x0, Math.min(x1, sx(v)));
+      el("circle", { class: "dot", cx, cy, r: 5, fill: cssVar(s.color) }, mark);
+    });
+    const hit = el("rect", { class: "hit", x: stacked ? 0 : x0 - 6, y: top + i * rowH, width: stacked ? width : x1 - x0 + 12, height: rowH }, mark);
+    hit.setAttribute("aria-label", r.label + ": " + series.filter((s) => r[s.key] !== undefined).map((s) => s.name + " " + pct(r[s.key], 2)).join(", "));
+    bindTip(hit, () => [
+      ...series.filter((s) => r[s.key] !== undefined).map((s) => ({ color: cssVar(s.color), value: pct(r[s.key], 2), label: s.name })),
+      ...(r.detail || []).map((d) => ({ label: d })),
+      { label: r.label },
+    ]);
+  });
+}
+
+function tableToggle(fig, buildTable) {
+  const btn = fig.querySelector(".table-toggle");
+  let table = null;
+  btn.setAttribute("aria-expanded", "false");
+  btn.addEventListener("click", () => {
+    if (!table) {
+      table = document.createElement("div"); table.className = "table-scroll";   // wide tables scroll on a phone
+      table.append(buildTable()); fig.appendChild(table); btn.textContent = "Hide table";
+    }
+    else { table.remove(); table = null; btn.textContent = "Show table"; }
+    btn.setAttribute("aria-expanded", String(!!table));
+  });
+}
+function makeTable(headers, rows, numericFrom = 1) {
+  const t = document.createElement("table"); t.className = "data";
+  const tr = document.createElement("tr");
+  headers.forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i >= numericFrom) th.className = "num"; tr.appendChild(th); });
+  const thead = document.createElement("thead"); thead.appendChild(tr); t.appendChild(thead);
+  const tb = document.createElement("tbody");
+  for (const r of rows) {
+    const row = document.createElement("tr");
+    r.forEach((c, i) => { const td = document.createElement("td"); td.textContent = c; if (i >= numericFrom) td.className = "num"; row.appendChild(td); });
+    tb.appendChild(row);
+  }
+  t.appendChild(tb); return t;
+}
+const niceDomain = (vals, pad, step) => {
+  const lo = Math.floor((Math.min(...vals) - pad) / step) * step, hi = Math.min(1, Math.ceil((Math.max(...vals) + pad) / step) * step);
+  const ticks = []; for (let v = lo; v <= hi + 1e-9; v += step) ticks.push(+v.toFixed(4));
+  return { domain: [lo, hi], ticks };
+};
+
+// ---------------------------------------------------------------- charts
+function chartTruth(ev) {
+  const fig = document.querySelector('[data-chart="truth"]'), box = fig.querySelector(".facets");
+  const series = [{ key: "recall", name: "Recall", color: "--series-1" }, { key: "precision", name: "Precision", color: "--series-2" }];
+  for (const vt of ["SNP", "INDEL"]) {
+    const rows = ev.truth_sets.map((t) => ({ label: t.truth.replace("GIAB ", ""), recall: t[vt].recall, precision: t[vt].precision,
+      detail: [`${int(t[vt].tp)} true positives of ${int(t[vt].truth_total)}`, `${int(t[vt].fn)} missed · ${int(t[vt].fp)} false calls`] }));
+    const vals = rows.flatMap((r) => [r.recall, r.precision]);
+    const { domain, ticks } = vt === "SNP" ? niceDomain(vals, 0.001, 0.005) : niceDomain(vals, 0.01, 0.05);
+    const cell = document.createElement("div"); box.appendChild(cell);
+    dotPlot(cell, { title: vt === "SNP" ? "SNPs" : "Indels", rows, domain, series, ticks, labelW: 120 });
+  }
+  tableToggle(fig, () => makeTable(["Truth set", "Type", "Recall", "Precision", "True positives", "Missed", "False calls"],
+    ev.truth_sets.flatMap((t) => ["SNP", "INDEL"].map((vt) => [t.truth, vt, pct(t[vt].recall, 2), pct(t[vt].precision, 2), int(t[vt].tp), int(t[vt].fn), int(t[vt].fp)])), 2));
+  const a = pick(ev.truth_sets, "truth", "GIAB v4.2.1").INDEL.recall, b = pick(ev.truth_sets, "truth", "GIAB v5.0q").INDEL.recall;
+  document.getElementById("truth-takeaway").textContent =
+    `Indel recall for the same calls: ${pct(a)} against v4.2.1, ${pct(b)} against v5.0q. A benchmark number without its truth set and version is not a result.`;
+}
+
+function chartStrata(ev) {
+  const fig = document.querySelector('[data-chart="strata"]'), box = fig.querySelector(".facets");
+  const series = [{ key: "recall", name: "Recall", color: "--series-1" }];
+  const overall = pick(ev.strata, "stratum", "All benchmark regions");
+  for (const vt of ["SNP", "INDEL"]) {
+    const rows = ev.strata.map((s) => ({ label: s.stratum, strong: s === overall, recall: s[vt].recall,
+      detail: [`${int(s[vt].fn)} missed of ${int(s[vt].truth_total)}`] }));
+    const vals = rows.map((r) => r.recall);
+    const { domain, ticks } = vt === "SNP" ? niceDomain(vals, 0.002, 0.01) : niceDomain(vals, 0.01, 0.05);
+    const cell = document.createElement("div"); box.appendChild(cell);
+    dotPlot(cell, { title: vt === "SNP" ? "SNPs" : "Indels", rows, domain, series, ticks, overall: overall[vt].recall, labelW: 230, width: 470 });
+  }
+  tableToggle(fig, () => makeTable(["Stratum", "SNP recall", "SNP missed", "Indel recall", "Indel missed"],
+    ev.strata.map((s) => [s.stratum, pct(s.SNP.recall, 2), int(s.SNP.fn), pct(s.INDEL.recall, 2), int(s.INDEL.fn)])));
+  const worst = [...ev.strata].sort((p, q) => p.SNP.recall - q.SNP.recall)[0];
+  document.getElementById("strata-takeaway").textContent =
+    `Overall SNP recall is ${pct(overall.SNP.recall, 2)}; in "${worst.stratum}" it is ${pct(worst.SNP.recall, 2)}. ` +
+    `Indel recall is ${pct(pick(ev.strata, "stratum", "Easy: outside every difficult region").INDEL.recall, 2)} in easy sequence and ` +
+    `${pct(pick(ev.strata, "stratum", "Tandem repeats and homopolymers").INDEL.recall, 2)} in repeats and homopolymers.`;
+}
+
+function chartSV(ev) {
+  const fig = document.querySelector('[data-chart="sv"]'), box = fig.querySelector(".facets");
+  const legend = document.getElementById("sv-legend");
+  const refined = ev.sv_refine && ev.sv_refine.length;
+  const addKey = (color, label) => { const s = document.createElement("span"); const i = document.createElement("i"); i.style.background = color; s.append(i, label); legend.appendChild(s); };
+  const v5 = (list) => (list || []).filter((r) => r.truth.includes("v5.0q"));
+  if (refined) {
+    addKey(cssVar("--series-2"), "Record by record (bench)"); addKey(cssVar("--series-1"), "Haplotype-aware (refine)");
+    const bench = v5(ev.sv_refine_bench), ref = v5(ev.sv_refine);
+    const na = (v) => (v === undefined ? "n/a" : pct(v));
+    const rows = bench.map((b) => { const r = ref.find((x) => x.caller === b.caller) || {};
+      return { label: b.caller, bench: b.recall, refine: r.recall, benchP: b.precision, refineP: r.precision,
+        detail: [`bench precision ${pct(b.precision)} · refine precision ${na(r.precision)}`] }; });
+    const { domain, ticks } = niceDomain(rows.flatMap((r) => [r.bench, r.refine]).filter((v) => v !== undefined), 0.02, 0.05);
+    const cell = document.createElement("div"); box.appendChild(cell);
+    dotPlot(cell, { title: "Recall against GIAB v5.0q", rows, domain, ticks, labelW: 130, width: 700,
+      series: [{ key: "bench", name: "Record by record", color: "--series-2" }, { key: "refine", name: "Haplotype-aware", color: "--series-1" }] });
+    tableToggle(fig, () => makeTable(["Caller", "Bench recall", "Refine recall", "Bench precision", "Refine precision"],
+      rows.map((r) => [r.label, pct(r.bench), na(r.refine), pct(r.benchP), na(r.refineP)])));
+    const gains = rows.map((r) => `${r.label} ${pct(r.bench)} → ${na(r.refine)}`).join(", ");
+    document.getElementById("sv-takeaway").textContent = `Recall against v5.0q, record by record versus haplotype-aware: ${gains}.`;
+  } else {
+    addKey(cssVar("--series-1"), "Recall"); addKey(cssVar("--series-2"), "Precision");
+    const rows = ev.sv_bench.map((r) => ({ label: `${r.caller} · ${r.truth.replace("GIAB ", "")}`, recall: r.recall, precision: r.precision,
+      detail: [`${int(r.tp)} of ${int(r.base)} truth SVs found`, `${int(r.fn)} missed · ${int(r.fp)} false calls`] }));
+    const { domain, ticks } = niceDomain(rows.flatMap((r) => [r.recall, r.precision]), 0.02, 0.05);
+    const cell = document.createElement("div"); box.appendChild(cell);
+    dotPlot(cell, { title: "Record-by-record comparison (bench)", rows, domain, ticks, labelW: 190, width: 700,
+      series: [{ key: "recall", name: "Recall", color: "--series-1" }, { key: "precision", name: "Precision", color: "--series-2" }] });
+    tableToggle(fig, () => makeTable(["Caller", "Truth set", "Recall", "Precision", "Found", "Missed", "False calls"],
+      ev.sv_bench.map((r) => [r.caller, r.truth, pct(r.recall), pct(r.precision), int(r.tp), int(r.fn), int(r.fp)]), 2));
+    const p = document.getElementById("sv-pending"); p.hidden = false;
+    const truths = [...new Set(ev.sv_bench.map((r) => r.truth))];
+    const recall = truths.map((t) => `${pctRange(ev.sv_bench.filter((r) => r.truth === t).map((r) => r.recall))} on ${t.replace("GIAB ", "")}`);
+    p.textContent = "The haplotype-aware (refine) comparison of these calls is not published yet, so this shows the record-by-record result: " +
+      `recall ${recall.join(", ")}, with precision ${pctRange(ev.sv_bench.map((r) => r.precision))}.`;
+  }
+}
+
+function chartSeqsim(ev) {
+  const fig = document.querySelector('[data-chart="seqsim"]'), box = fig.querySelector(".facets");
+  const d = ev.seqsim_baseline, rows = d.rows;
+  const width = Math.min(700, Math.max(300, box.clientWidth || 700)), h = 260, m = { l: 48, r: 16, t: 14, b: 40 };
+  const narrow = width < 520;
+  const svg = el("svg", { class: "plot", viewBox: `0 0 ${width} ${h}`, role: "img",
+    "aria-label": "Sequence similarity of unrelated random sequence pairs by length, against the 70 percent threshold" }, box);
+  svg.style.maxWidth = width + "px";
+  const lx = rows.map((r) => Math.log10(r.length));
+  const sx = (v) => m.l + ((Math.log10(v) - lx[0]) / (lx[lx.length - 1] - lx[0])) * (width - m.l - m.r);
+  const y0 = 0.60, y1 = 0.80, sy = (v) => m.t + (1 - (v - y0) / (y1 - y0)) * (h - m.t - m.b);
+  const g = el("g", { class: "grid" }, svg);
+  for (const t of [0.6, 0.65, 0.7, 0.75, 0.8]) {
+    el("line", { x1: m.l, x2: width - m.r, y1: sy(t), y2: sy(t) }, g);
+    text(el("g", { class: "tick" }, svg), m.l - 8, sy(t) + 4, (100 * t).toFixed(0) + "%", { "text-anchor": "end" });
+  }
+  for (const r of rows) {
+    if (narrow && (r.length === 200 || r.length === 2000)) continue;   // keep tick labels apart on a phone
+    text(el("g", { class: "tick" }, svg), sx(r.length), h - m.b + 18, r.length >= 1000 ? r.length / 1000 + " kb" : r.length + " bp", { "text-anchor": "middle" });
+  }
+  text(svg, (m.l + width - m.r) / 2, h - 4, "Length of each sequence (log scale)", { "text-anchor": "middle" });
+  // band and median
+  const band = rows.map((r) => `${sx(r.length)},${sy(r.p95)}`).concat([...rows].reverse().map((r) => `${sx(r.length)},${sy(r.p05)}`));
+  el("polygon", { points: band.join(" "), fill: cssVar("--band") }, svg);
+  el("polyline", { points: rows.map((r) => `${sx(r.length)},${sy(r.median)}`).join(" "), fill: "none", stroke: cssVar("--series-1"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+  // the threshold: a reference rule in ink, labelled -- not a series
+  el("line", { x1: m.l, x2: width - m.r, y1: sy(d.threshold), y2: sy(d.threshold), stroke: cssVar("--ink-2"), "stroke-width": 1.5 }, svg);
+  text(svg, width - m.r, sy(d.threshold) + 16, narrow ? "pctseq 0.7: above passes" : "pctseq 0.7 (default): pairs above this line pass", { "text-anchor": "end", fill: cssVar("--ink"), "font-weight": 600 });
+  // crosshair hover
+  const cross = el("line", { y1: m.t, y2: h - m.b, stroke: cssVar("--axis"), "stroke-width": 1, visibility: "hidden" }, svg);
+  const dots = rows.map((r) => el("circle", { class: "dot", cx: sx(r.length), cy: sy(r.median), r: 4, fill: cssVar("--series-1") }, svg));
+  const hit = el("rect", { class: "hit", x: m.l, y: m.t, width: width - m.l - m.r, height: h - m.t - m.b }, svg);
+  hit.setAttribute("aria-label", "Similarity by length; use the table for exact values");
+  const nearest = (clientX) => {
+    const b = svg.getBoundingClientRect(), x = ((clientX - b.left) / b.width) * width;
+    return rows.reduce((best, r) => (Math.abs(sx(r.length) - x) < Math.abs(sx(best.length) - x) ? r : best), rows[0]);
+  };
+  hit.setAttribute("tabindex", "0");
+  const show = (e, r) => {
+    cross.setAttribute("x1", sx(r.length)); cross.setAttribute("x2", sx(r.length)); cross.setAttribute("visibility", "visible");
+    showTip(e, [{ color: cssVar("--series-1"), value: pct(r.median), label: "median similarity" },
+      { label: `5th–95th percentile ${pct(r.p05)}–${pct(r.p95)}` },
+      { label: `${pct(r.share_at_or_above_0_7, 0)} of ${r.pairs} unrelated pairs pass 0.7` },
+      { label: `${r.length.toLocaleString("en-US")} bp sequences` }]);
+  };
+  hit.addEventListener("pointermove", (e) => show(e, nearest(e.clientX)));
+  hit.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+  hit.addEventListener("focus", (e) => show(e, rows[3]));
+  hit.addEventListener("blur", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+  // direct label on the endpoint only
+  const last = rows[rows.length - 1];
+  text(svg, sx(last.length) - 6, sy(last.median) - 10, pct(last.median), { "text-anchor": "end", fill: cssVar("--ink"), "font-weight": 600 });
+  tableToggle(fig, () => makeTable(["Length", "Median", "5th pct", "95th pct", "Share passing 0.7"],
+    rows.map((r) => [int(r.length) + " bp", pct(r.median), pct(r.p05), pct(r.p95), pct(r.share_at_or_above_0_7, 0)])));
+  document.getElementById("seqsim-caption").textContent =
+    `Each length: ${rows[0].pairs} pairs of unrelated uniform-random sequences, scored with truvari's own similarity function (truvari 5.4.0). Axis starts at 60 %.`;
+}
+
+function runRecord(ev) {
+  if (!ev.provenance) return;
+  const rows = ev.provenance.flatMap((r, i) => {
+    const run = ev.provenance.length > 1 ? `Run ${i + 1}: ` : "";
+    return [[run + "metrics table", r.metrics_sha256], [run + "configuration", r.config_sha256],
+      ...(r.commit ? [[run + "thoth commit", r.describe || r.commit]] : []),
+      ...Object.entries(r.containers).map(([name, digest]) => [`${run}${name} image`, digest])];
+  });
+  const box = document.getElementById("run-record");
+  box.append(makeTable(["Behind the results on this page", "Identifier"], rows, 2));
+  box.hidden = false;
+}
+
+// ---------------------------------------------------------------- load
+fetch("data/evidence.json")
+  .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then((ev) => {
+    document.getElementById("provenance").textContent =
+      `Results: GIAB ${ev.sample}, ${ev.technology} sequencing, ${(ev.provenance || []).length > 1 ? "two runs of the same calls" : "one run"}, scored by thoth. Caller names are the public tools used.`;
+    chartTruth(ev); chartStrata(ev); chartSV(ev); chartSeqsim(ev); runRecord(ev);
+  })
+  .catch((err) => { document.getElementById("provenance").textContent = "Could not load results (" + err.message + ")."; });
+</script>
+</body>
+</html>

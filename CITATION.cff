@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: >-
+  If you use thoth, please cite it as below, together with the GIAB truth sets,
+  stratifications and comparison tools it runs (see "Citing" in README.md).
+title: thoth
+abstract: >-
+  A pipeline-neutral GIAB benchmarking harness: scores every caller's VCFs
+  against every applicable GIAB truth set, small variants with hap.py/vcfeval,
+  stratified, and structural variants with truvari.
+type: software
+authors:
+  - family-names: Haagmans
+    given-names: Martin
+license: MIT
+repository-code: "https://github.com/martinandclaude/thoth"
+url: "https://martinandclaude.github.io/thoth/"
+keywords:
+  - benchmarking
+  - variant calling
+  - Genome in a Bottle
+  - Snakemake

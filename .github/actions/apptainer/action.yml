@@ -1,0 +1,20 @@
+name: Install apptainer
+description: >-
+  Install the pinned apptainer release, checked against the sha256 GitHub
+  publishes for the release asset. Used by both workflows, after checkout.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        APPTAINER_DEB: https://github.com/apptainer/apptainer/releases/download/v1.4.5/apptainer_1.4.5_amd64.deb
+        APPTAINER_SHA256: 70f19af846501acfbc2e42e7cfeee9ee11ddbbfa1c3502d0d99cde34e8e0af05
+      run: |
+        set -euo pipefail
+        curl -fsSL -o /tmp/apptainer.deb "$APPTAINER_DEB"
+        echo "$APPTAINER_SHA256  /tmp/apptainer.deb" | sha256sum -c -
+        sudo apt-get update -qq && sudo apt-get install -y -qq /tmp/apptainer.deb
+        # Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor,
+        # which rootless apptainer needs. The runner is disposable.
+        sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+        apptainer --version

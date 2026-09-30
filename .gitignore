@@ -1,0 +1,17 @@
+results/
+.snakemake/
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+
+# Site-specific: paths, SLURM account, real run files. Templates are committed
+# (config/site.example.yaml, profiles/slurm.example/, runs/run.example.yaml).
+config/site.yaml
+profiles/slurm/
+runs/*
+!runs/run.example.yaml
+
+# Test scratch.
+tests/work/
+.ruff_cache/

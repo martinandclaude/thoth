@@ -1,0 +1,40 @@
+# End-to-end test on every push to main and every pull request: the real
+# pipeline, run by the pinned driver environment, in the published containers
+# fetched by digest -- exactly as a cluster runs it -- on planted data whose
+# correct answers are known. See tests/make_fixtures.py and tests/check_results.py.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - uses: ./.github/actions/apptainer
+
+      - name: Driver environment
+        run: pip install --require-hashes -r requirements-driver.lock
+
+      - name: Fetch containers by digest
+        run: |
+          if grep -qP '\tPENDING\t' workflow/containers.tsv; then
+            echo "::error::workflow/containers.tsv has PENDING digests -- run the containers workflow and record its digests first"
+            exit 1
+          fi
+          THOTH_CONTAINERS_DIR=tests/work/sifs workflow/scripts/fetch_containers.sh --test
+
+      - name: End-to-end test
+        run: tests/run.sh

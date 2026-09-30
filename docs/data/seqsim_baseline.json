@@ -1,0 +1,86 @@
+{
+ "method": "truvari.comparisons.seqsim on pairs of unrelated uniform-random sequences, 200 pairs per length, truvari 5.4.0 (docs/seqsim_baseline.py)",
+ "threshold": 0.7,
+ "rows": [
+  {
+   "length": 50,
+   "pairs": 200,
+   "min": 0.67,
+   "p05": 0.68,
+   "median": 0.71,
+   "p95": 0.75,
+   "max": 0.79,
+   "share_at_or_above_0_7": 0.795
+  },
+  {
+   "length": 100,
+   "pairs": 200,
+   "min": 0.68,
+   "p05": 0.7,
+   "median": 0.72,
+   "p95": 0.745,
+   "max": 0.76,
+   "share_at_or_above_0_7": 0.955
+  },
+  {
+   "length": 200,
+   "pairs": 200,
+   "min": 0.7025,
+   "p05": 0.7125,
+   "median": 0.73,
+   "p95": 0.745,
+   "max": 0.7525,
+   "share_at_or_above_0_7": 1.0
+  },
+  {
+   "length": 300,
+   "pairs": 200,
+   "min": 0.715,
+   "p05": 0.72,
+   "median": 0.7317,
+   "p95": 0.7417,
+   "max": 0.75,
+   "share_at_or_above_0_7": 1.0
+  },
+  {
+   "length": 500,
+   "pairs": 200,
+   "min": 0.72,
+   "p05": 0.727,
+   "median": 0.734,
+   "p95": 0.742,
+   "max": 0.747,
+   "share_at_or_above_0_7": 1.0
+  },
+  {
+   "length": 1000,
+   "pairs": 200,
+   "min": 0.727,
+   "p05": 0.7315,
+   "median": 0.7365,
+   "p95": 0.7425,
+   "max": 0.744,
+   "share_at_or_above_0_7": 1.0
+  },
+  {
+   "length": 2000,
+   "pairs": 200,
+   "min": 0.7335,
+   "p05": 0.7352,
+   "median": 0.7385,
+   "p95": 0.7422,
+   "max": 0.7452,
+   "share_at_or_above_0_7": 1.0
+  },
+  {
+   "length": 5000,
+   "pairs": 200,
+   "min": 0.7374,
+   "p05": 0.7383,
+   "median": 0.7401,
+   "p95": 0.7418,
+   "max": 0.7435,
+   "share_at_or_above_0_7": 1.0
+  }
+ ]
+}
