@@ -1,6 +1,6 @@
 # thoth
 
-<https://martinandclaude.github.io/thoth/>**
+<https://martinandclaude.github.io/thoth/>
 
 A pipeline-neutral GIAB benchmarking harness. Give it a run file listing each
 sample's VCFs, per caller; it scores every caller against every applicable GIAB
