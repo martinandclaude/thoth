@@ -1,8 +1,5 @@
-<p align="center"><img src="docs/assets/thoth.png" alt="thoth" width="520"></p>
-
 # thoth
 
-**Why the way you benchmark changes the answer — with real results:
 <https://martinandclaude.github.io/thoth/>**
 
 A pipeline-neutral GIAB benchmarking harness. Give it a run file listing each
