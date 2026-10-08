@@ -4,6 +4,12 @@ from snakemake.utils import min_version
 
 min_version("9.0")
 
+# RHEL exports `which` as a bash function that calls /usr/bin/which with GNU
+# options (/etc/profile.d/which2.sh). Apptainer hands it to the container, where
+# Debian's which rejects them, so rtg's launcher (rtg format, and vcfeval under
+# hap.py) finds no java: "Unable to execute java".
+shell.prefix("set -euo pipefail; unset -f which; ")
+
 
 configfile: "config/config.yaml"
 

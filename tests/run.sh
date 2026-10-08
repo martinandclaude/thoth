@@ -75,6 +75,9 @@ sys.exit(1 if bad else 0)
 PY
 
 echo "=== full run ==="
+# As on RHEL (/etc/profile.d/which2.sh): an exported `which` the containers must not inherit.
+which() { (alias; declare -f) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot "$@"; }
+export -f which
 snakemake --configfile "$W/test.yaml" --cores 2 --software-deployment-method apptainer --printshellcmds
 
 echo "=== a fetched file that differs from its pinned sha256 ==="
